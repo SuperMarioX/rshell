@@ -12,6 +12,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path"
 	"strings"
 	"time"
 )
@@ -284,7 +285,7 @@ func run() error {
 					var err error
 					for _, value := range task.Sftptasks {
 						if value.Type == DOWNLOAD {
-							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, value.SrcFile, value.DesDir)
+							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, value.SrcFile, path.Join(value.DesDir, hg.Groupname))
 							if err == nil {
 								hostresult.Stdout = "DOWNLOAD Success."
 							}
