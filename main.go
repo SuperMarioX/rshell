@@ -33,7 +33,7 @@ var (
 func initFlag() {
 	cmd := os.Args[0]
 	flag.Usage = func() {
-		fmt.Println(`Usage:`, cmd, `[<options>] <playbook>
+		fmt.Println(`Usage:`, cmd, `[<options>] <arguments>
 
 Options:`)
 		flag.PrintDefaults()
