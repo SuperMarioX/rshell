@@ -106,9 +106,6 @@ func initArgs(playbook string) {
 }
 
 func hgCompleter(d prompt.Document) []prompt.Suggest {
-	if d.GetCharRelativeToCursor(0) == 0 {
-		return nil
-	}
 	return prompt.FilterHasPrefix(ps, d.GetWordBeforeCursor(), true)
 }
 
