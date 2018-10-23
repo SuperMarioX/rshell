@@ -247,7 +247,21 @@ func run() error {
 			case res := <-taskchs:
 				taskresult.Results = append(taskresult.Results, res)
 			case <-time.After(time.Duration(cfg.Tasktimeout) * time.Second):
-				taskresult.Results = append(taskresult.Results, Hostresult{})
+				break
+			}
+		}
+		if len(taskresult.Results) != len(hg.Hosts) {
+			m := make(map[string]bool)
+			for _, v := range taskresult.Results {
+				m[v.Hostaddr] = true
+			}
+			for _, v := range hg.Hosts {
+				if _, ok := m[v]; !ok {
+					var h Hostresult
+					h.Hostaddr = v
+					h.Error = "TIMEOUT"
+					taskresult.Results = append(taskresult.Results, h)
+				}
 			}
 		}
 		utils.Output(taskresult)

@@ -1,0 +1,15 @@
+authmethods:
+- name: method01 
+  username: root
+  password: Cloud12#$
+
+- name: method02
+  username: root
+  privatekey: "E:\\tmp\\id_rsa"
+  passphrase: "123456"
+
+- name: paas 
+  username: paas
+  password: Cdk@12#$56
+  sudotype: su
+  sudopass: Cloud12#$

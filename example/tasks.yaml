@@ -1,0 +1,24 @@
+tasks:
+- taskname: test01
+  hostgroups: hostgroup01 
+  sshtasks: 
+  - hostname
+  - whoami
+  - date
+
+- taskname: test-om-base
+  hostgroups: OM-Base
+  sshtasks: 
+  - hostname
+  - whoami
+  - sleep 50
+  - date
+  
+- taskname: test03
+  hostgroups: hostgroup03
+  sshtasks: 
+  - hostname
+  - whoami
+  - date
+
+
