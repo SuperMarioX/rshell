@@ -33,7 +33,9 @@ func Output(result types.Taskresult) {
 	for _, ret := range result.Results {
 		color.Green("HOST [%-16s] --------------------------------------------------------\n", ret.Hostaddr)
 		color.Magenta("%s\n","STDOUT =>")
-		fmt.Printf("%s\n", ret.Stdout)
+		if ret.Stdout != "" {
+			fmt.Printf("%s\n", ret.Stdout)
+		}
 		if ret.Stderr != "" {
 			color.Red("%s\n", "STDERR =>")
 			fmt.Printf("%s\n", ret.Stderr)
@@ -41,6 +43,9 @@ func Output(result types.Taskresult) {
 		if ret.Error != "" {
 			color.Red("%s\n", "ERROR =>")
 			fmt.Printf("%s\n", ret.Error)
+		}
+		if ret.Stdout == "" && ret.Stderr == "" && ret.Error == "" {
+			fmt.Println()
 		}
 	}
 }

@@ -33,11 +33,19 @@ type Auths struct {
 }
 
 //Task config
+type Sftptask struct {
+	Type string `yaml:"type,omitempty"`
+	SrcFile string `yaml:"srcfile,omitempty"`
+	DesDir string `yaml:"desdir,omitempty"`
+}
+
 type Task struct {
 	Taskname string `yaml:"taskname,omitempty"`
 	Hostgroups string `yaml:"hostgroups,omitempty"`
 	Sshtasks []string `yaml:"sshtasks,omitempty"`
+	Sftptasks []Sftptask `yaml:"sftptasks,omitempty"`
 }
+
 type Tasks struct {
 	Ts []Task `yaml:"tasks,omitempty"`
 }

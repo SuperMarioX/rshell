@@ -18,6 +18,8 @@ import (
 const (
 	Interactive string = "interactive"
 	SCRIPT      string = "script"
+	DOWNLOAD    string = "download"
+	UPLOAD      string = "upload"
 )
 
 var (
@@ -98,7 +100,16 @@ func hgCompleter(d prompt.Document) []prompt.Suggest {
 	return prompt.FilterHasPrefix(ps, d.GetWordBeforeCursor(), true)
 }
 
-var ps []prompt.Suggest
+var ps = []prompt.Suggest{
+	{
+		Text: DOWNLOAD,
+		Description: "Download file from remote host",
+	},
+	{
+		Text: UPLOAD,
+		Description: "Upload file to remote host",
+	},
+}
 
 func main() {
 	initFlag()
@@ -127,7 +138,7 @@ func interactiveRun() {
 		}
 		ps = append(ps, p)
 	}
-	fmt.Println("Please select hostgroup and input commmands.")
+	fmt.Println("Usage: [hostgroup cmd1; cmd2; cmd3] or [hostgroup download/upload srcFile desDir] or [Ctrl c] exit.")
 	for {
 		v := prompt.Input(">>> ", hgCompleter)
 		if strings.Trim(string(v), " ") == "" {
@@ -142,13 +153,35 @@ func interactiveRun() {
 			fmt.Println("The hostgroup and commands needed.")
 			continue
 		}
-		t := Task{
-			Taskname:   "DEFAULT",
-			Hostgroups: vs[0],
-			Sshtasks:   strings.Split(vs[1], ";"),
-		}
 		tasks = Tasks{}
-		tasks.Ts = append(tasks.Ts, t)
+		if strings.HasPrefix(vs[1], DOWNLOAD) || strings.HasPrefix(vs[1], UPLOAD) {
+			vss := strings.Split(vs[1], " ")
+			if len(vss) != 3 {
+				fmt.Println("The sftp commands needs. Usage: hostgroup download/upload srcFile desDir")
+				continue
+			}
+			t := Task{
+				Taskname:   "DEFAULT",
+				Hostgroups: vs[0],
+				Sshtasks:   []string{},
+				Sftptasks:  []Sftptask{
+					Sftptask{
+						Type:    vss[0],
+						SrcFile: vss[1],
+						DesDir:  vss[2],
+					},
+				},
+			}
+			tasks.Ts = append(tasks.Ts, t)
+		} else {
+			t := Task{
+				Taskname:   "DEFAULT",
+				Hostgroups: vs[0],
+				Sshtasks:   strings.Split(vs[1], ";"),
+			}
+			tasks.Ts = append(tasks.Ts, t)
+		}
+
 		err := run()
 		if err != nil {
 			fmt.Printf("ERROR: %v\n", err)
@@ -207,13 +240,13 @@ func run() error {
 		if password == "" && privatekey == "" {
 			return fmt.Errorf("%s", "Password and PrivateKey empty.")
 		}
-		if len(task.Sshtasks) == 0 {
-			return fmt.Errorf("%s", "SSH Tasks empty.")
+		if len(task.Sshtasks) == 0 && len(task.Sftptasks) == 0 {
+			return fmt.Errorf("%s", "SSH and SFTP Tasks empty.")
 		}
-		if !strings.HasPrefix(task.Sshtasks[len(task.Sshtasks)-1], "exit") {
+		if len(task.Sshtasks) != 0 && !strings.HasPrefix(task.Sshtasks[len(task.Sshtasks)-1], "exit") {
 			task.Sshtasks = append(task.Sshtasks, "exit")
 		}
-		if sudotype != "" && sudopass != "" {
+		if len(task.Sshtasks) != 0 && sudotype != "" && sudopass != "" {
 			task.Sshtasks = append([]string{sudotype, sudopass}, task.Sshtasks...)
 			task.Sshtasks = append(task.Sshtasks, "exit")
 		}
@@ -227,15 +260,40 @@ func run() error {
 				var hostresult Hostresult
 				hostresult.Hostaddr = host
 
-				var stdout, stderr string
-				var err error
-				stdout, stderr, err = lwssh.SSHShell(host, sshport, username, password, privatekey, passphrase, ciphers, task.Sshtasks)
-				if err != nil {
-					hostresult.Error = err.Error()
-				} else {
-					hostresult.Stdout = stdout
-					hostresult.Stderr = stderr
+				if len(task.Sshtasks) != 0 {
+					var stdout, stderr string
+					var err error
+					stdout, stderr, err = lwssh.SSHShell(host, sshport, username, password, privatekey, passphrase, ciphers, task.Sshtasks)
+					if err != nil {
+						hostresult.Error = err.Error()
+					} else {
+						hostresult.Stdout = stdout
+						hostresult.Stderr = stderr
+					}
 				}
+
+				if len(task.Sftptasks) != 0 {
+					var err error
+					for _, value := range task.Sftptasks {
+						if value.Type == DOWNLOAD {
+							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, value.SrcFile, value.DesDir)
+							if err == nil {
+								hostresult.Stdout = "DOWNLOAD Success."
+							}
+						} else if value.Type == UPLOAD {
+							err = lwssh.ScpUpload(host, sshport, username, password, privatekey, passphrase, ciphers, value.SrcFile, value.DesDir)
+							if err == nil {
+								hostresult.Stdout = "UPLOAD Success."
+							}
+						} else {
+							err = fmt.Errorf("%s", "Not support scp type, not in [download/upload].")
+						}
+					}
+					if err != nil {
+						hostresult.Error = err.Error()
+					}
+				}
+
 				taskchs <- hostresult
 				<-limit
 			}(host, sshport, username, password, privatekey, passphrase, sudotype, sudopass, ciphers, task)
