@@ -148,8 +148,9 @@ func interactiveRun() {
 		ps = append(ps, p)
 	}
 	fmt.Println("Usage: [hostgroup cmd1; cmd2; cmd3] or [hostgroup download/upload srcFile desDir] or [Ctrl c] exit.")
+	var his = []string{}
 	for {
-		v := prompt.Input(">>> ", hgCompleter)
+		v := prompt.Input(">>> ", hgCompleter, prompt.OptionHistory(his))
 		if strings.Trim(string(v), " ") == "" {
 			continue
 		}
@@ -190,7 +191,7 @@ func interactiveRun() {
 			}
 			tasks.Ts = append(tasks.Ts, t)
 		}
-
+		his = append(his, string(v))
 		err := run()
 		if err != nil {
 			fmt.Printf("ERROR: %v\n", err)
