@@ -106,17 +106,20 @@ func initArgs(playbook string) {
 }
 
 func hgCompleter(d prompt.Document) []prompt.Suggest {
+	if d.GetCharRelativeToCursor(0) == 0 {
+		return nil
+	}
 	return prompt.FilterHasPrefix(ps, d.GetWordBeforeCursor(), true)
 }
 
 var ps = []prompt.Suggest{
 	{
 		Text: DOWNLOAD,
-		Description: "Download file from remote host",
+		Description: "COMMAND: Download file from remote host",
 	},
 	{
 		Text: UPLOAD,
-		Description: "Upload file to remote host",
+		Description: "COMMAND: Upload file to remote host",
 	},
 }
 
@@ -143,7 +146,7 @@ func interactiveRun() {
 	for _, value := range hostgroups.Hgs {
 		p := prompt.Suggest{
 			Text:        value.Groupname,
-			Description: "",
+			Description: "HOSTGROUP",
 		}
 		ps = append(ps, p)
 	}
@@ -154,7 +157,7 @@ func interactiveRun() {
 		if strings.Trim(string(v), " ") == "" {
 			continue
 		}
-		vs := strings.SplitN(string(v), " ", 2)
+		vs := strings.SplitN(strings.Trim(string(v), " "), " ", 2)
 		if len(vs) != 2 {
 			fmt.Println("The hostgroup and commands needed.")
 			continue
@@ -191,7 +194,7 @@ func interactiveRun() {
 			}
 			tasks.Ts = append(tasks.Ts, t)
 		}
-		his = append(his, string(v))
+		his = append(his, strings.Trim(string(v), " "))
 		err := run()
 		if err != nil {
 			fmt.Printf("ERROR: %v\n", err)
