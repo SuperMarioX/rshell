@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -66,6 +67,13 @@ func initHosts() {
 	err = yaml.Unmarshal(h, &hostgroups)
 	if err != nil {
 		log.Fatalf("error: %v", err)
+	}
+	for _, hg := range hostgroups.Hgs {
+		for _, h := range hg.Hosts {
+			if net.ParseIP(h) == nil {
+				log.Fatalf("IP illegal [%s/%s].", hg.Groupname, h)
+			}
+		}
 	}
 }
 
