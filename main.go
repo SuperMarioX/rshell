@@ -177,7 +177,7 @@ func interactiveRun() {
 			continue
 		}
 		tasks = Tasks{}
-		if strings.HasPrefix(vs[1], DOWNLOAD) || strings.HasPrefix(vs[1], UPLOAD) {
+		if strings.HasPrefix(vs[1], DOWNLOAD + " ") || strings.HasPrefix(vs[1], UPLOAD + " ") {
 			vss := strings.Split(vs[1], " ")
 			if len(vss) != 3 {
 				fmt.Println("The sftp commands needs. Usage: hostgroup download/upload srcFile desDir")
@@ -218,7 +218,7 @@ func interactiveRun() {
 					continue
 				}
 				sug = prompt.Suggest{
-					Text:        value,
+					Text:        strings.Trim(value, " "),
 					Description: "COMMAND",
 				}
 				pss.Add(sug)
@@ -316,24 +316,25 @@ func run() error {
 				}
 
 				if len(task.Sftptasks) != 0 {
+					hostresult.Stdout += "\n"
 					var err error
 					for _, value := range task.Sftptasks {
 						if value.Type == DOWNLOAD {
 							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, value.SrcFile, path.Join(value.DesDir, hg.Groupname))
 							if err == nil {
-								hostresult.Stdout = "DOWNLOAD Success."
+								hostresult.Stdout += "DOWNLOAD Success [" + value.SrcFile + " -> " + path.Join(value.DesDir, hg.Groupname) + "]\n"
 							}
 						} else if value.Type == UPLOAD {
 							err = lwssh.ScpUpload(host, sshport, username, password, privatekey, passphrase, ciphers, value.SrcFile, value.DesDir)
 							if err == nil {
-								hostresult.Stdout = "UPLOAD Success."
+								hostresult.Stdout += "UPLOAD   Success [" + value.SrcFile + " -> " + value.DesDir + "]\n"
 							}
 						} else {
 							err = fmt.Errorf("%s", "Not support scp type, not in [download/upload].")
 						}
 					}
 					if err != nil {
-						hostresult.Error = err.Error()
+						hostresult.Error += err.Error()
 					}
 				}
 
