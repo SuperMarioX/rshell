@@ -6,19 +6,16 @@ tasks:
   - whoami
   - date
 
-- taskname: test-om-base
-  hostgroups: OM-Base
-  sshtasks: 
+- taskname: test02
+  hostgroups: hostgroup02
+  sshtasks:
   - hostname
   - whoami
-  - sleep 50
   - date
-  
+
 - taskname: test03
   hostgroups: hostgroup03
-  sshtasks: 
+  sshtasks:
   - hostname
   - whoami
   - date
-
-

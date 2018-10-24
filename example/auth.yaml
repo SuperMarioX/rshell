@@ -1,15 +1,17 @@
 authmethods:
-- name: method01 
-  username: root
-  password: Cloud12#$
+- name: alpha-env-ttt-key-su
+  username: ttt
+  privatekey: ""                    #First auth method option[privatekey]
+  passphrase: ""                    #First auth method option[passphrase]
+  password: Huawei@123              #Second auth method option[password]
+  sudotype: "su -"                  #Optional：Change root command if needed
+  sudopass: Cloud12#$               #Optional：root password if needed
 
-- name: method02
+- name: alpha-env-root-key
   username: root
   privatekey: "E:\\tmp\\id_rsa"
   passphrase: "123456"
 
-- name: paas 
-  username: paas
-  password: Cdk@12#$56
-  sudotype: su
-  sudopass: Cloud12#$
+- name: alpha-env-root-pass
+  username: root
+  password: Cloud12#$

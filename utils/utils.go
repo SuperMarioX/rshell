@@ -44,8 +44,5 @@ func Output(result types.Taskresult) {
 			color.Red("%s\n", "ERROR =>")
 			fmt.Printf("%s\n", ret.Error)
 		}
-		if ret.Stdout == "" && ret.Stderr == "" && ret.Error == "" {
-			fmt.Println()
-		}
 	}
 }

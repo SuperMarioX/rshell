@@ -1,2 +1,2 @@
-concurrency: 6
-tasktimeout: 300
+concurrency: 6          #The num of concurrency goroutine for hosts
+tasktimeout: 300        #The total timeout [second] of everyone goroutine

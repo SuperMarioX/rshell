@@ -1,19 +1,19 @@
 hostgroups:
-- groupname: hostgroup03 
-  authmethod: method02 
+- groupname: hostgroup01
+  authmethod: alpha-env-ttt-key-su
+  sshport: 22
+  hosts:
+  - 192.168.31.37
+  - 192.168.31.63
+
+- groupname: hostgroup02
+  authmethod: alpha-env-root-key
   sshport: 22
   hosts:
   - 192.168.31.37
 
-- groupname: hostgroup01
-  authmethod: method01
+- groupname: hostgroup03
+  authmethod: alpha-env-root-pass
   sshport: 22
   hosts:
   - 192.168.31.63
-  - 192.168.31.37
-
-- groupname: OM-Base
-  authmethod: paas
-  sshport: 22
-  hosts:
-  - 192.145.65.119

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/c-bata/go-prompt"
+	"github.com/deckarep/golang-set"
 	"github.com/luckywinds/lwssh"
 	. "github.com/luckywinds/rshell/types"
 	"github.com/luckywinds/rshell/utils"
@@ -103,7 +104,7 @@ func initArgs(playbook string) {
 }
 
 func hgCompleter(d prompt.Document) []prompt.Suggest {
-	return prompt.FilterHasPrefix(ps, d.GetWordBeforeCursor(), true)
+	return prompt.FilterHasPrefix(pssl, d.GetWordBeforeCursor(), true)
 }
 
 var ps = []prompt.Suggest{
@@ -116,6 +117,9 @@ var ps = []prompt.Suggest{
 		Description: "KEYWORDS: Upload file to remote host",
 	},
 }
+
+var pss = mapset.NewSet()
+var pssl = []prompt.Suggest{}
 
 func main() {
 	initFlag()
@@ -135,19 +139,32 @@ func main() {
 }
 
 func interactiveRun() {
+	for _, value := range ps {
+		pss.Add(value)
+	}
 	for _, value := range hostgroups.Hgs {
 		p := prompt.Suggest{
 			Text:        value.Groupname,
 			Description: "HOSTGROUP",
 		}
-		ps = append(ps, p)
+		pss.Add(p)
 	}
+
 	fmt.Println("Usage: [hostgroup cmd1; cmd2; cmd3] or [hostgroup download/upload srcFile desDir] or [Ctrl c] exit.")
 	var his = []string{}
 	var sug = prompt.Suggest{}
 	for {
+		pssl = []prompt.Suggest{}
+		for _, value := range pss.ToSlice() {
+			v := value.(prompt.Suggest)
+			pssl = append(pssl, v)
+		}
 		v := prompt.Input(">>> ", hgCompleter, prompt.OptionHistory(his), prompt.OptionMaxSuggestion(6))
 		if strings.Trim(string(v), " ") == "" {
+			continue
+		}
+		if strings.Trim(string(v), " ") == "?" {
+			fmt.Println("Usage: [hostgroup cmd1; cmd2; cmd3] or [hostgroup download/upload srcFile desDir] or [Ctrl c] exit.")
 			continue
 		}
 		vs := strings.SplitN(strings.Trim(string(v), " "), " ", 2)
@@ -171,7 +188,7 @@ func interactiveRun() {
 				Hostgroups: vs[0],
 				Sshtasks:   []string{},
 				Sftptasks:  []Sftptask{
-					Sftptask{
+					{
 						Type:    vss[0],
 						SrcFile: vss[1],
 						DesDir:  vss[2],
@@ -183,12 +200,12 @@ func interactiveRun() {
 				Text:        vss[1],
 				Description: "FILE",
 			}
-			ps = append(ps, sug)
+			pss.Add(sug)
 			sug = prompt.Suggest{
 				Text:        vss[2],
 				Description: "DIRECTORY",
 			}
-			ps = append(ps, sug)
+			pss.Add(sug)
 		} else {
 			t := Task{
 				Taskname:   "DEFAULT",
@@ -204,7 +221,7 @@ func interactiveRun() {
 					Text:        value,
 					Description: "COMMAND",
 				}
-				ps = append(ps, sug)
+				pss.Add(sug)
 			}
 		}
 		his = append(his, strings.Trim(string(v), " "))
