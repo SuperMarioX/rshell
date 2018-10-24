@@ -28,10 +28,7 @@ var (
 	cfgFile   = flag.String("cfg", "cfg.yaml", "System Config file to read")
 	hostsFile = flag.String("hosts", "hosts.yaml", "Hosts Config file to read")
 	authFile  = flag.String("auth", "auth.yaml", "Auth Config file to read")
-	mode      = flag.String("mode", "interactive", "The Run mode, options[interactive/script], DEFAULT is interactive.")
 	script    = flag.String("f", "", "The script yaml.")
-	hg        = flag.String("g", "", "The target hostgroup.")
-	cmd       = flag.String("c", "", "The commands split by ;")
 )
 
 func initFlag() {
@@ -112,11 +109,11 @@ func hgCompleter(d prompt.Document) []prompt.Suggest {
 var ps = []prompt.Suggest{
 	{
 		Text: DOWNLOAD,
-		Description: "COMMAND: Download file from remote host",
+		Description: "KEYWORDS: Download file from remote host",
 	},
 	{
 		Text: UPLOAD,
-		Description: "COMMAND: Upload file to remote host",
+		Description: "KEYWORDS: Upload file to remote host",
 	},
 }
 
@@ -130,12 +127,10 @@ func main() {
 		fmt.Println("The hostgroup empty.")
 	}
 
-	if *mode == Interactive {
+	if *script == "" {
 		interactiveRun()
-	} else if *mode == SCRIPT {
-		scriptRun()
 	} else {
-		log.Fatal("The mode not supported. not in [interactive/script]")
+		scriptRun()
 	}
 }
 
@@ -149,8 +144,9 @@ func interactiveRun() {
 	}
 	fmt.Println("Usage: [hostgroup cmd1; cmd2; cmd3] or [hostgroup download/upload srcFile desDir] or [Ctrl c] exit.")
 	var his = []string{}
+	var sug = prompt.Suggest{}
 	for {
-		v := prompt.Input(">>> ", hgCompleter, prompt.OptionHistory(his))
+		v := prompt.Input(">>> ", hgCompleter, prompt.OptionHistory(his), prompt.OptionMaxSuggestion(6))
 		if strings.Trim(string(v), " ") == "" {
 			continue
 		}
@@ -183,6 +179,16 @@ func interactiveRun() {
 				},
 			}
 			tasks.Ts = append(tasks.Ts, t)
+			sug = prompt.Suggest{
+				Text:        vss[1],
+				Description: "FILE",
+			}
+			ps = append(ps, sug)
+			sug = prompt.Suggest{
+				Text:        vss[2],
+				Description: "DIRECTORY",
+			}
+			ps = append(ps, sug)
 		} else {
 			t := Task{
 				Taskname:   "DEFAULT",
@@ -190,6 +196,16 @@ func interactiveRun() {
 				Sshtasks:   strings.Split(vs[1], ";"),
 			}
 			tasks.Ts = append(tasks.Ts, t)
+			for _, value := range t.Sshtasks {
+				if strings.Trim(value, " ") == "" {
+					continue
+				}
+				sug = prompt.Suggest{
+					Text:        value,
+					Description: "COMMAND",
+				}
+				ps = append(ps, sug)
+			}
 		}
 		his = append(his, strings.Trim(string(v), " "))
 		err := run()
