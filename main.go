@@ -323,18 +323,20 @@ func run() error {
 							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, value.SrcFile, path.Join(value.DesDir, hg.Groupname))
 							if err == nil {
 								hostresult.Stdout += "DOWNLOAD Success [" + value.SrcFile + " -> " + path.Join(value.DesDir, hg.Groupname) + "]\n"
+							} else {
+								hostresult.Error += "DOWNLOAD Failed [" + value.SrcFile + " -> " + path.Join(value.DesDir, hg.Groupname) + "] " + err.Error() + "\n"
 							}
 						} else if value.Type == UPLOAD {
 							err = lwssh.ScpUpload(host, sshport, username, password, privatekey, passphrase, ciphers, value.SrcFile, value.DesDir)
 							if err == nil {
-								hostresult.Stdout += "UPLOAD   Success [" + value.SrcFile + " -> " + value.DesDir + "]\n"
+								hostresult.Stdout += "UPLOAD Success [" + value.SrcFile + " -> " + value.DesDir + "]\n"
+							} else {
+								hostresult.Error += "UPLOAD Failed [" + value.SrcFile + " -> " + value.DesDir + "] " + err.Error() + "\n"
 							}
 						} else {
-							err = fmt.Errorf("%s", "Not support scp type, not in [download/upload].")
+							err = fmt.Errorf("%s", "")
+							hostresult.Error += "SFTP Failed. Not support type[" + value.Type + "], not in [download/upload].\n"
 						}
-					}
-					if err != nil {
-						hostresult.Error += err.Error()
 					}
 				}
 
