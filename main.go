@@ -159,7 +159,7 @@ func interactiveRun() {
 			v := value.(prompt.Suggest)
 			pssl = append(pssl, v)
 		}
-		v := prompt.Input(">>> ", hgCompleter, prompt.OptionHistory(his), prompt.OptionMaxSuggestion(6))
+		v := prompt.Input("rshell: ", hgCompleter, prompt.OptionHistory(his), prompt.OptionMaxSuggestion(6))
 		if strings.Trim(string(v), " ") == "" {
 			continue
 		}
