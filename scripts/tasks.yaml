@@ -1,6 +1,7 @@
 tasks:
 - taskname: test01
-  hostgroups: hostgroup01 
+  hostgroups: hostgroup01
+  sudoroot: true
   sshtasks: 
   - hostname
   - whoami
@@ -14,10 +15,10 @@ tasks:
   - date
   sftptasks:
   - type: download
-    srcfile: anaconda-ks.cfg
+    srcfile: LICENSE
     desdir: .
   - type: upload
-    srcfile: cfg.yaml
+    srcfile: LICENSE
     desdir: .
 
 - taskname: test03
@@ -28,8 +29,8 @@ tasks:
   - date
   sftptasks:
   - type: download
-    srcfile: anaconda-ks.cfg
+    srcfile: LICENSE
     desdir: .
   - type: upload
-    srcfile: cfg.yaml
+    srcfile: LICENSE
     desdir: .

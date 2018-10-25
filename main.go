@@ -23,19 +23,20 @@ const (
 	SCRIPT      string = "script"
 	DOWNLOAD    string = "download"
 	UPLOAD      string = "upload"
+	SUDO        string = "sudo"
 )
 
 var (
-	cfgFile   = flag.String("cfg", "cfg.yaml", "System Config file to read")
-	hostsFile = flag.String("hosts", "hosts.yaml", "Hosts Config file to read")
-	authFile  = flag.String("auth", "auth.yaml", "Auth Config file to read")
+	cfgFile   = flag.String("cfg", path.Join(".rshell", "cfg.yaml"), "System Config file to read, Default: " + path.Join(".rshell", "cfg.yaml"))
+	hostsFile = flag.String("hosts", path.Join(".rshell", "hosts.yaml"), "Hosts Config file to read, Default: " + path.Join(".rshell", "hosts.yaml"))
+	authFile  = flag.String("auth", path.Join(".rshell", "auth.yaml"), "Auth Config file to read, Default: " + path.Join(".rshell", "hosts.yaml"))
 	script    = flag.String("f", "", "The script yaml.")
 )
 
 func initFlag() {
 	cmd := os.Args[0]
 	flag.Usage = func() {
-		fmt.Println(`Usage:`, cmd, `[<options>] <arguments>
+		fmt.Println(`Usage:`, cmd, `[<options>]
 
 Options:`)
 		flag.PrintDefaults()
@@ -116,12 +117,17 @@ var ps = []prompt.Suggest{
 		Text: UPLOAD,
 		Description: "KEYWORDS: Upload file to remote host",
 	},
+	{
+		Text: SUDO,
+		Description: "KEYWORDS: auto change root",
+	},
 }
 
 var pss = mapset.NewSet()
 var pssl = []prompt.Suggest{}
 
 func main() {
+	os.Mkdir(".rshell", os.ModeDir)
 	initFlag()
 	initCfg()
 	initHosts()
@@ -138,7 +144,17 @@ func main() {
 	}
 }
 
+func showInteractiveRunUsage() {
+	fmt.Println(`Usage:
+    SSH Task: hostgroup cmd1; cmd2; cmd3
+    SSH Task(sudo root): hostgroup sudo cmd1; cmd2; cmd3
+    SFTP Task: hostgroup download/upload srcFile desDir
+    Exit: Ctrl c
+    Help: ?`)
+}
+
 func interactiveRun() {
+	showInteractiveRunUsage()
 	for _, value := range ps {
 		pss.Add(value)
 	}
@@ -150,7 +166,6 @@ func interactiveRun() {
 		pss.Add(p)
 	}
 
-	fmt.Println("Usage: [hostgroup cmd1; cmd2; cmd3] or [hostgroup download/upload srcFile desDir] or [Ctrl c] exit.")
 	var his = []string{}
 	var sug = prompt.Suggest{}
 	for {
@@ -164,7 +179,7 @@ func interactiveRun() {
 			continue
 		}
 		if strings.Trim(string(v), " ") == "?" {
-			fmt.Println("Usage: [hostgroup cmd1; cmd2; cmd3] or [hostgroup download/upload srcFile desDir] or [Ctrl c] exit.")
+			showInteractiveRunUsage()
 			continue
 		}
 		vs := strings.SplitN(strings.Trim(string(v), " "), " ", 2)
@@ -180,7 +195,8 @@ func interactiveRun() {
 		if strings.HasPrefix(vs[1], DOWNLOAD + " ") || strings.HasPrefix(vs[1], UPLOAD + " ") {
 			vss := strings.Split(vs[1], " ")
 			if len(vss) != 3 {
-				fmt.Println("The sftp commands needs. Usage: hostgroup download/upload srcFile desDir")
+				fmt.Println("The sftp commands needs.")
+				showInteractiveRunUsage()
 				continue
 			}
 			t := Task{
@@ -206,6 +222,30 @@ func interactiveRun() {
 				Description: "DIRECTORY",
 			}
 			pss.Add(sug)
+		} else if strings.HasPrefix(vs[1], "sudo") {
+			vss := strings.SplitN(vs[1], " ", 2)
+			if len(vss) <= 1 || strings.Trim(vss[1], " ") == "" {
+				fmt.Println("The ssh sudo commands needs.")
+				showInteractiveRunUsage()
+				continue
+			}
+			t := Task{
+				Taskname:   "DEFAULT",
+				Hostgroups: vs[0],
+				Sudoroot: true,
+				Sshtasks:   strings.Split(vss[1], ";"),
+			}
+			tasks.Ts = append(tasks.Ts, t)
+			for _, value := range t.Sshtasks {
+				if strings.Trim(value, " ") == "" {
+					continue
+				}
+				sug = prompt.Suggest{
+					Text:        strings.Trim(value, " "),
+					Description: "COMMAND",
+				}
+				pss.Add(sug)
+			}
 		} else {
 			t := Task{
 				Taskname:   "DEFAULT",
@@ -286,10 +326,13 @@ func run() error {
 		if len(task.Sshtasks) == 0 && len(task.Sftptasks) == 0 {
 			return fmt.Errorf("%s", "SSH and SFTP Tasks empty.")
 		}
-		if len(task.Sshtasks) != 0 && !strings.HasPrefix(task.Sshtasks[len(task.Sshtasks)-1], "exit") {
+		if len(task.Sshtasks) != 0 && task.Sshtasks[len(task.Sshtasks)-1] != "exit" && !strings.HasPrefix(task.Sshtasks[len(task.Sshtasks)-1], "exit ") {
 			task.Sshtasks = append(task.Sshtasks, "exit")
 		}
-		if len(task.Sshtasks) != 0 && sudotype != "" && sudopass != "" {
+		if len(task.Sshtasks) != 0 && task.Sudoroot {
+			if sudotype == "" {
+				sudotype = "su"
+			}
 			task.Sshtasks = append([]string{sudotype, sudopass}, task.Sshtasks...)
 			task.Sshtasks = append(task.Sshtasks, "exit")
 		}

@@ -42,6 +42,7 @@ type Sftptask struct {
 type Task struct {
 	Taskname string `yaml:"taskname,omitempty"`
 	Hostgroups string `yaml:"hostgroups,omitempty"`
+	Sudoroot bool `yaml:"sudoroot,omitempty"`
 	Sshtasks []string `yaml:"sshtasks,omitempty"`
 	Sftptasks []Sftptask `yaml:"sftptasks,omitempty"`
 }
