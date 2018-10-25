@@ -314,8 +314,11 @@ func run() error {
 		if len(hg.Hosts) == 0 {
 			return fmt.Errorf("%s", "Hosts empty.")
 		}
-		if sshport <= 0 {
+		if sshport < 0 {
 			return fmt.Errorf("%s", "SSH Port not right.")
+		}
+		if sshport == 0 {
+			sshport = 22
 		}
 		if username == "" {
 			return fmt.Errorf("%s", "Username empty.")

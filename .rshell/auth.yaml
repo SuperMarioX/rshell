@@ -1,11 +1,11 @@
 authmethods:
 - name: alpha-env-ttt-key-su
   username: ttt
-  privatekey: ""                    #First auth method option[privatekey]
-  passphrase: ""                    #First auth method option[passphrase]
-  password: Huawei@123              #Second auth method option[password]
-  sudotype: "su -"                  #Optional：Change root command if needed
-  sudopass: Cloud12#$               #Optional：root password if needed
+  privatekey: ""                    #First auth method option[privatekey], default: ""
+  passphrase: ""                    #First auth method option[passphrase], default: ""
+  password: Huawei@123              #Second auth method option[password], default: ""
+  sudotype: "su -"                  #Optional：Change root command if needed, default: "su"
+  sudopass: Cloud12#$               #Optional：root password if needed, default: ""
 
 - name: alpha-env-root-key
   username: root
