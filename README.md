@@ -45,12 +45,20 @@ rshell.exe
 
 使用说明：
 ```
-Usage:
-    SSH Task: hostgroup cmd1; cmd2; cmd3
-    SSH Task(sudo root): hostgroup sudo cmd1; cmd2; cmd3
-    SFTP Task: hostgroup download/upload srcFile desDir
-    Exit: Ctrl c
-    Help: ?
+Usage: <keywords> <hostgroup> <agruments>
+
+do hostgroup cmd1; cmd2; cmd3
+    --- Run cmds on hostgroup use normal user
+sudo hostgroup sudo cmd1; cmd2; cmd3
+    --- Run cmds on hostgroup use root which auto change from normal user
+download hostgroup srcFile desDir
+    --- Download srcFile from hostgroup to local desDir
+upload hostgroup srcFile desDir
+    --- Upload srcFile from local to hostgroup desDir
+ctrl c
+    --- Exit
+?
+    --- Help
 ```
 
 ## 输出说明
