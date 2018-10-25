@@ -77,7 +77,7 @@ ERROR =>
 
 ## 引用
 
-- "github.com/c-bata/go-prompt"
+- "github.com/chzyer/readline"
 - "github.com/deckarep/golang-set"
 - "gopkg.in/yaml.v2"
 - "github.com/fatih/color"

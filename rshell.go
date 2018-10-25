@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/c-bata/go-prompt"
-	"github.com/deckarep/golang-set"
+	"github.com/chzyer/readline"
 	"github.com/luckywinds/lwssh"
 	. "github.com/luckywinds/rshell/types"
 	"github.com/luckywinds/rshell/utils"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -27,9 +27,9 @@ const (
 )
 
 var (
-	cfgFile   = flag.String("cfg", path.Join(".rshell", "cfg.yaml"), "System Config file to read, Default: " + path.Join(".rshell", "cfg.yaml"))
-	hostsFile = flag.String("hosts", path.Join(".rshell", "hosts.yaml"), "Hosts Config file to read, Default: " + path.Join(".rshell", "hosts.yaml"))
-	authFile  = flag.String("auth", path.Join(".rshell", "auth.yaml"), "Auth Config file to read, Default: " + path.Join(".rshell", "hosts.yaml"))
+	cfgFile   = flag.String("cfg", path.Join(".rshell", "cfg.yaml"), "System Config file to read, Default: "+path.Join(".rshell", "cfg.yaml"))
+	hostsFile = flag.String("hosts", path.Join(".rshell", "hosts.yaml"), "Hosts Config file to read, Default: "+path.Join(".rshell", "hosts.yaml"))
+	authFile  = flag.String("auth", path.Join(".rshell", "auth.yaml"), "Auth Config file to read, Default: "+path.Join(".rshell", "hosts.yaml"))
 	script    = flag.String("f", "", "The script yaml.")
 )
 
@@ -104,28 +104,6 @@ func initArgs(playbook string) {
 	}
 }
 
-func hgCompleter(d prompt.Document) []prompt.Suggest {
-	return prompt.FilterHasPrefix(pssl, d.GetWordBeforeCursor(), true)
-}
-
-var ps = []prompt.Suggest{
-	{
-		Text: DOWNLOAD,
-		Description: "KEYWORDS: Download file from remote host",
-	},
-	{
-		Text: UPLOAD,
-		Description: "KEYWORDS: Upload file to remote host",
-	},
-	{
-		Text: SUDO,
-		Description: "KEYWORDS: auto change root",
-	},
-}
-
-var pss = mapset.NewSet()
-var pssl = []prompt.Suggest{}
-
 func main() {
 	os.Mkdir(".rshell", os.ModeDir)
 	initFlag()
@@ -145,128 +123,153 @@ func main() {
 }
 
 func showInteractiveRunUsage() {
-	fmt.Println(`Usage:
-    SSH Task: hostgroup cmd1; cmd2; cmd3
-    SSH Task(sudo root): hostgroup sudo cmd1; cmd2; cmd3
-    SFTP Task: hostgroup download/upload srcFile desDir
-    Exit: Ctrl c
-    Help: ?`)
+	fmt.Println(`Usage: <keywords> <hostgroup> <agruments>
+
+do hostgroup cmd1; cmd2; cmd3
+    --- Run cmds on hostgroup use normal user
+sudo hostgroup sudo cmd1; cmd2; cmd3
+    --- Run cmds on hostgroup use root which auto change from normal user
+download hostgroup srcFile desDir
+    --- Download srcFile from hostgroup to local desDir
+upload hostgroup srcFile desDir
+    --- Upload srcFile from local to hostgroup desDir
+ctrl c
+    --- Exit
+?
+    --- Help`)
 }
 
-func interactiveRun() {
-	showInteractiveRunUsage()
-	for _, value := range ps {
-		pss.Add(value)
-	}
-	for _, value := range hostgroups.Hgs {
-		p := prompt.Suggest{
-			Text:        value.Groupname,
-			Description: "HOSTGROUP",
+func listHgs(hgs string) func(string) []string {
+	return func(line string) []string {
+		hgs := []string{}
+		for _, value := range hostgroups.Hgs {
+			hgs = append(hgs, value.Groupname)
 		}
-		pss.Add(p)
+		return hgs
 	}
+}
 
-	var his = []string{}
-	var sug = prompt.Suggest{}
+var completer = readline.NewPrefixCompleter(
+	readline.PcItem("do",
+		readline.PcItemDynamic(listHgs("")),
+	),
+	readline.PcItem("sudo",
+		readline.PcItemDynamic(listHgs("")),
+	),
+	readline.PcItem("download",
+		readline.PcItemDynamic(listHgs("")),
+	),
+	readline.PcItem("upload",
+		readline.PcItemDynamic(listHgs("")),
+	),
+)
+
+func interactiveRun() {
+	l, err := readline.NewEx(&readline.Config{
+		Prompt:              "\033[31mrshell:\033[0m ",
+		HistoryFile:         ".rshell/rshell.history",
+		AutoComplete:        completer,
+		InterruptPrompt:     "^C",
+		EOFPrompt:           "exit",
+		HistorySearchFold:   true,
+	})
+	if err != nil {
+		panic(err)
+	}
+	defer l.Close()
+
 	for {
-		pssl = []prompt.Suggest{}
-		for _, value := range pss.ToSlice() {
-			v := value.(prompt.Suggest)
-			pssl = append(pssl, v)
-		}
-		v := prompt.Input("rshell: ", hgCompleter, prompt.OptionHistory(his), prompt.OptionMaxSuggestion(6))
-		if strings.Trim(string(v), " ") == "" {
-			continue
-		}
-		if strings.Trim(string(v), " ") == "?" {
-			showInteractiveRunUsage()
-			continue
-		}
-		vs := strings.SplitN(strings.Trim(string(v), " "), " ", 2)
-		if len(vs) != 2 {
-			fmt.Println("The hostgroup and commands needed.")
-			continue
-		}
-		if vs[0] == "" || vs[1] == "" {
-			fmt.Println("The hostgroup and commands needed.")
-			continue
-		}
+		retry:
 		tasks = Tasks{}
-		if strings.HasPrefix(vs[1], DOWNLOAD + " ") || strings.HasPrefix(vs[1], UPLOAD + " ") {
-			vss := strings.Split(vs[1], " ")
-			if len(vss) != 3 {
-				fmt.Println("The sftp commands needs.")
-				showInteractiveRunUsage()
+		line, err := l.Readline()
+		if err == readline.ErrInterrupt {
+			if len(line) == 0 {
+				break
+			} else {
 				continue
 			}
+		} else if err == io.EOF {
+			break
+		}
+
+		line = strings.TrimSpace(line)
+		switch {
+		case strings.HasPrefix(line, "do "):
+			if err := utils.CheckDo(hostgroups, line); err != nil {
+				fmt.Printf("%v\n", err.Error())
+				showInteractiveRunUsage()
+				break
+			}
+			lines := strings.SplitN(line, " ", 3)
 			t := Task{
-				Taskname:   "DEFAULT",
-				Hostgroups: vs[0],
-				Sshtasks:   []string{},
-				Sftptasks:  []Sftptask{
+				Taskname:   "do",
+				Hostgroups: lines[1],
+				Sshtasks:   strings.Split(lines[2], ";"),
+			}
+			tasks.Ts = append(tasks.Ts, t)
+		case strings.HasPrefix(line, "sudo "):
+			if err := utils.CheckSudo(hostgroups, line); err != nil {
+				fmt.Printf("%v\n", err.Error())
+				showInteractiveRunUsage()
+				break
+			}
+			lines := strings.SplitN(line, " ", 3)
+			t := Task{
+				Taskname:   "sudo",
+				Hostgroups: lines[1],
+				Sudoroot:   true,
+				Sshtasks:   strings.Split(lines[2], ";"),
+			}
+			tasks.Ts = append(tasks.Ts, t)
+		case strings.HasPrefix(line, "download "):
+			if err := utils.CheckDownload(hostgroups, line); err != nil {
+				fmt.Printf("%v\n", err.Error())
+				showInteractiveRunUsage()
+				break
+			}
+			lines := strings.SplitN(line, " ", 4)
+			t := Task{
+				Taskname:   "download",
+				Hostgroups: lines[1],
+				Sftptasks: []Sftptask{
 					{
-						Type:    vss[0],
-						SrcFile: vss[1],
-						DesDir:  vss[2],
+						Type:    "download",
+						SrcFile: lines[2],
+						DesDir:  lines[3],
 					},
 				},
 			}
 			tasks.Ts = append(tasks.Ts, t)
-			sug = prompt.Suggest{
-				Text:        vss[1],
-				Description: "FILE",
-			}
-			pss.Add(sug)
-			sug = prompt.Suggest{
-				Text:        vss[2],
-				Description: "DIRECTORY",
-			}
-			pss.Add(sug)
-		} else if strings.HasPrefix(vs[1], "sudo") {
-			vss := strings.SplitN(vs[1], " ", 2)
-			if len(vss) <= 1 || strings.Trim(vss[1], " ") == "" {
-				fmt.Println("The ssh sudo commands needs.")
+		case strings.HasPrefix(line, "upload "):
+			if err := utils.CheckUpload(hostgroups, line); err != nil {
+				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
-				continue
+				break
 			}
+			lines := strings.SplitN(line, " ", 4)
 			t := Task{
-				Taskname:   "DEFAULT",
-				Hostgroups: vs[0],
-				Sudoroot: true,
-				Sshtasks:   strings.Split(vss[1], ";"),
+				Taskname:   "upload",
+				Hostgroups: lines[1],
+				Sftptasks: []Sftptask{
+					{
+						Type:    "upload",
+						SrcFile: lines[2],
+						DesDir:  lines[3],
+					},
+				},
 			}
 			tasks.Ts = append(tasks.Ts, t)
-			for _, value := range t.Sshtasks {
-				if strings.Trim(value, " ") == "" {
-					continue
-				}
-				sug = prompt.Suggest{
-					Text:        strings.Trim(value, " "),
-					Description: "COMMAND",
-				}
-				pss.Add(sug)
-			}
-		} else {
-			t := Task{
-				Taskname:   "DEFAULT",
-				Hostgroups: vs[0],
-				Sshtasks:   strings.Split(vs[1], ";"),
-			}
-			tasks.Ts = append(tasks.Ts, t)
-			for _, value := range t.Sshtasks {
-				if strings.Trim(value, " ") == "" {
-					continue
-				}
-				sug = prompt.Suggest{
-					Text:        strings.Trim(value, " "),
-					Description: "COMMAND",
-				}
-				pss.Add(sug)
-			}
+		case line == "?":
+			showInteractiveRunUsage()
+			goto retry
+		case line == "":
+			goto retry
+		default:
+			showInteractiveRunUsage()
+			goto retry
 		}
-		his = append(his, strings.Trim(string(v), " "))
-		err := run()
-		if err != nil {
+
+		if err := run(); err != nil {
 			fmt.Printf("ERROR: %v\n", err)
 		}
 	}
