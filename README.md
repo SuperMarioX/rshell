@@ -80,8 +80,7 @@ ERROR =>
 
 ## 约束
 
-- 同一task下的sshtasks和sftptasks无关联关系
-- 同一sftptasks下的download和upload无关联关系
+- 同一task下的sshtasks和sftptasks无关联关系（默认先执行sshtasks）
 
 ## 引用
 
