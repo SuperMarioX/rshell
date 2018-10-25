@@ -23,7 +23,6 @@ const (
 	SCRIPT      string = "script"
 	DOWNLOAD    string = "download"
 	UPLOAD      string = "upload"
-	SUDO        string = "sudo"
 )
 
 var (
@@ -139,7 +138,7 @@ ctrl c
     --- Help`)
 }
 
-func listHgs(hgs string) func(string) []string {
+func listHgs() func(string) []string {
 	return func(line string) []string {
 		hgs := []string{}
 		for _, value := range hostgroups.Hgs {
@@ -151,16 +150,16 @@ func listHgs(hgs string) func(string) []string {
 
 var completer = readline.NewPrefixCompleter(
 	readline.PcItem("do",
-		readline.PcItemDynamic(listHgs("")),
+		readline.PcItemDynamic(listHgs()),
 	),
 	readline.PcItem("sudo",
-		readline.PcItemDynamic(listHgs("")),
+		readline.PcItemDynamic(listHgs()),
 	),
 	readline.PcItem("download",
-		readline.PcItemDynamic(listHgs("")),
+		readline.PcItemDynamic(listHgs()),
 	),
 	readline.PcItem("upload",
-		readline.PcItemDynamic(listHgs("")),
+		readline.PcItemDynamic(listHgs()),
 	),
 )
 
