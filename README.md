@@ -74,3 +74,10 @@ ERROR =>
 
 - 同一task下的sshtasks和sftptasks无关联关系
 - 同一sftptasks下的download和upload无关联关系
+
+## 引用
+
+- "github.com/c-bata/go-prompt"
+- "github.com/deckarep/golang-set"
+- "gopkg.in/yaml.v2"
+- "github.com/fatih/color"
