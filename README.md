@@ -86,6 +86,6 @@ ERROR =>
 ## 引用
 
 - "github.com/chzyer/readline"
-- "github.com/deckarep/golang-set"
+- "github.com/luckywinds/lwssh"
 - "gopkg.in/yaml.v2"
 - "github.com/fatih/color"
