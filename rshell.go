@@ -18,6 +18,7 @@ import (
 	"time"
 )
 
+
 const (
 	Interactive string = "interactive"
 	SCRIPT      string = "script"
@@ -357,10 +358,9 @@ func run() error {
 					stdout, stderr, err = lwssh.SSHShell(host, sshport, username, password, privatekey, passphrase, ciphers, task.Sshtasks)
 					if err != nil {
 						hostresult.Error = err.Error()
-					} else {
-						hostresult.Stdout = stdout
-						hostresult.Stderr = stderr
 					}
+					hostresult.Stdout = stdout
+					hostresult.Stderr = stderr
 				}
 
 				if len(task.Sftptasks) != 0 {
