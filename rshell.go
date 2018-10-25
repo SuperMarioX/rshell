@@ -194,66 +194,66 @@ func interactiveRun() {
 		line = strings.TrimSpace(line)
 		switch {
 		case strings.HasPrefix(line, "do "):
-			if err := utils.CheckDo(hostgroups, line); err != nil {
+			d, h, c, err := utils.GetDo(hostgroups, line)
+			if err != nil {
 				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
-				break
+				goto retry
 			}
-			lines := strings.SplitN(line, " ", 3)
 			t := Task{
-				Taskname:   "do",
-				Hostgroups: lines[1],
-				Sshtasks:   strings.Split(lines[2], ";"),
+				Taskname:   d,
+				Hostgroups: h,
+				Sshtasks:   strings.Split(c, ";"),
 			}
 			tasks.Ts = append(tasks.Ts, t)
 		case strings.HasPrefix(line, "sudo "):
-			if err := utils.CheckSudo(hostgroups, line); err != nil {
+			s, h, c, err := utils.GetSudo(hostgroups, line)
+			if err != nil {
 				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
-				break
+				goto retry
 			}
-			lines := strings.SplitN(line, " ", 3)
 			t := Task{
-				Taskname:   "sudo",
-				Hostgroups: lines[1],
+				Taskname:   s,
+				Hostgroups: h,
 				Sudoroot:   true,
-				Sshtasks:   strings.Split(lines[2], ";"),
+				Sshtasks:   strings.Split(c, ";"),
 			}
 			tasks.Ts = append(tasks.Ts, t)
 		case strings.HasPrefix(line, "download "):
-			if err := utils.CheckDownload(hostgroups, line); err != nil {
+			d, h, sf, dd, err := utils.GetDownload(hostgroups, line)
+			if err != nil {
 				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
-				break
+				goto retry
 			}
-			lines := strings.SplitN(line, " ", 4)
 			t := Task{
-				Taskname:   "download",
-				Hostgroups: lines[1],
+				Taskname:   d,
+				Hostgroups: h,
 				Sftptasks: []Sftptask{
 					{
-						Type:    "download",
-						SrcFile: lines[2],
-						DesDir:  lines[3],
+						Type:    d,
+						SrcFile: sf,
+						DesDir:  dd,
 					},
 				},
 			}
 			tasks.Ts = append(tasks.Ts, t)
 		case strings.HasPrefix(line, "upload "):
-			if err := utils.CheckUpload(hostgroups, line); err != nil {
+			u, h, sf, dd, err := utils.GetUpload(hostgroups, line)
+			if err != nil {
 				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
-				break
+				goto retry
 			}
-			lines := strings.SplitN(line, " ", 4)
 			t := Task{
-				Taskname:   "upload",
-				Hostgroups: lines[1],
+				Taskname:   u,
+				Hostgroups: h,
 				Sftptasks: []Sftptask{
 					{
-						Type:    "upload",
-						SrcFile: lines[2],
-						DesDir:  lines[3],
+						Type:    u,
+						SrcFile: sf,
+						DesDir:  dd,
 					},
 				},
 			}
