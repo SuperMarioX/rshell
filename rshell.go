@@ -246,7 +246,9 @@ func interactiveRun() {
 			}
 			tasks.Ts = append(tasks.Ts, t)
 			for _, value := range t.Sshtasks {
-				cset.Add(strings.TrimSpace(value) + ";")
+				if strings.TrimSpace(value) != "" {
+					cset.Add(strings.TrimSpace(value) + ";")
+				}
 			}
 		case strings.HasPrefix(line, "sudo "):
 			s, h, c, err := utils.GetSudo(hostgroups, line)
@@ -263,7 +265,9 @@ func interactiveRun() {
 			}
 			tasks.Ts = append(tasks.Ts, t)
 			for _, value := range t.Sshtasks {
-				cset.Add(strings.TrimSpace(value) + ";")
+				if strings.TrimSpace(value) != "" {
+					cset.Add(strings.TrimSpace(value) + ";")
+				}
 			}
 		case strings.HasPrefix(line, "download "):
 			d, h, sf, dd, err := utils.GetDownload(hostgroups, line)
