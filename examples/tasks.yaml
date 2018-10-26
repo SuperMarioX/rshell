@@ -1,5 +1,5 @@
 tasks:
-- taskname: test01
+- taskname: test-sudo
   hostgroups: hostgroup01
   sudoroot: true
   sshtasks: 
@@ -7,30 +7,30 @@ tasks:
   - whoami
   - date
 
-- taskname: test02
-  hostgroups: hostgroup02
+- taskname: test-all
+  hostgroups: host123
   sshtasks:
   - hostname
   - whoami
   - date
   sftptasks:
   - type: download
-    srcfile: LICENSE
+    srcfile: rshell
     desdir: .
   - type: upload
-    srcfile: LICENSE
+    srcfile: rshell
     desdir: .
 
-- taskname: test03
-  hostgroups: hostgroup03
+- taskname: test-single
+  hostgroups: host03
   sshtasks:
   - hostname
   - whoami
   - date
   sftptasks:
   - type: download
-    srcfile: LICENSE
+    srcfile: rshell
     desdir: .
   - type: upload
-    srcfile: LICENSE
+    srcfile: rshell
     desdir: .

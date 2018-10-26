@@ -33,7 +33,6 @@ func Output(result types.Taskresult) {
 	color.Yellow("TASK [%-16s] ********************************************************\n", result.Name)
 	for _, ret := range result.Results {
 		color.Green("HOST [%-16s] --------------------------------------------------------\n", ret.Hostaddr)
-		color.Magenta("%s\n","STDOUT =>")
 		if ret.Stdout != "" {
 			fmt.Printf("%s\n", ret.Stdout)
 		}
@@ -42,7 +41,7 @@ func Output(result types.Taskresult) {
 			fmt.Printf("%s\n", ret.Stderr)
 		}
 		if ret.Error != "" {
-			color.Red("%s\n", "ERROR =>")
+			color.Red("%s\n", "SYSERR =>")
 			fmt.Printf("%s\n", ret.Error)
 		}
 	}
