@@ -16,6 +16,7 @@ import (
 	"path"
 	"strings"
 	"time"
+	"github.com/scylladb/go-set/strset"
 )
 
 
@@ -140,7 +141,7 @@ ctrl c
 }
 
 func listHgs() func(string) []string {
-	return func(line string) []string {
+	return func(string) []string {
 		hgs := []string{}
 		for _, value := range hostgroups.Hgs {
 			hgs = append(hgs, value.Groupname)
@@ -149,18 +150,55 @@ func listHgs() func(string) []string {
 	}
 }
 
+var cset = strset.New()
+func listCmds() func(string) []string {
+	return func(string) []string {
+		return cset.List()
+	}
+}
+
+var sset = strset.New()
+func listSrcs() func(string) []string {
+	return func(string) []string {
+		return sset.List()
+	}
+}
+
+var dset = strset.New()
+func listDess() func(string) []string {
+	return func(string) []string {
+		return dset.List()
+	}
+}
+
 var completer = readline.NewPrefixCompleter(
 	readline.PcItem("do",
-		readline.PcItemDynamic(listHgs()),
+		readline.PcItemDynamic(listHgs(),
+			readline.PcItemDynamic(listCmds(),
+				readline.PcItemDynamic(listCmds(),
+					readline.PcItemDynamic(listCmds(),
+						readline.PcItemDynamic(listCmds(),
+							readline.PcItemDynamic(listCmds(),
+								readline.PcItemDynamic(listCmds()))))))),
 	),
 	readline.PcItem("sudo",
-		readline.PcItemDynamic(listHgs()),
+		readline.PcItemDynamic(listHgs(),
+			readline.PcItemDynamic(listCmds(),
+				readline.PcItemDynamic(listCmds(),
+					readline.PcItemDynamic(listCmds(),
+						readline.PcItemDynamic(listCmds(),
+							readline.PcItemDynamic(listCmds(),
+								readline.PcItemDynamic(listCmds()))))))),
 	),
 	readline.PcItem("download",
-		readline.PcItemDynamic(listHgs()),
+		readline.PcItemDynamic(listHgs(),
+			readline.PcItemDynamic(listSrcs(),
+				readline.PcItemDynamic(listDess()))),
 	),
 	readline.PcItem("upload",
-		readline.PcItemDynamic(listHgs()),
+		readline.PcItemDynamic(listHgs(),
+			readline.PcItemDynamic(listSrcs(),
+				readline.PcItemDynamic(listDess()))),
 	),
 )
 
@@ -207,6 +245,9 @@ func interactiveRun() {
 				Sshtasks:   strings.Split(c, ";"),
 			}
 			tasks.Ts = append(tasks.Ts, t)
+			for _, value := range t.Sshtasks {
+				cset.Add(strings.TrimSpace(value) + ";")
+			}
 		case strings.HasPrefix(line, "sudo "):
 			s, h, c, err := utils.GetSudo(hostgroups, line)
 			if err != nil {
@@ -221,6 +262,9 @@ func interactiveRun() {
 				Sshtasks:   strings.Split(c, ";"),
 			}
 			tasks.Ts = append(tasks.Ts, t)
+			for _, value := range t.Sshtasks {
+				cset.Add(strings.TrimSpace(value) + ";")
+			}
 		case strings.HasPrefix(line, "download "):
 			d, h, sf, dd, err := utils.GetDownload(hostgroups, line)
 			if err != nil {
@@ -240,6 +284,8 @@ func interactiveRun() {
 				},
 			}
 			tasks.Ts = append(tasks.Ts, t)
+			sset.Add(strings.TrimSpace(sf))
+			dset.Add(strings.TrimSpace(dd))
 		case strings.HasPrefix(line, "upload "):
 			u, h, sf, dd, err := utils.GetUpload(hostgroups, line)
 			if err != nil {
@@ -259,6 +305,8 @@ func interactiveRun() {
 				},
 			}
 			tasks.Ts = append(tasks.Ts, t)
+			sset.Add(strings.TrimSpace(sf))
+			dset.Add(strings.TrimSpace(dd))
 		case line == "?":
 			showInteractiveRunUsage()
 			goto retry
