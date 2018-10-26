@@ -88,3 +88,4 @@ ERROR =>
 - "github.com/luckywinds/lwssh"
 - "gopkg.in/yaml.v2"
 - "github.com/fatih/color"
+- "github.com/scylladb/go-set/strset"
