@@ -1,2 +1,4 @@
 concurrency: 6          #The num of concurrency goroutine for hosts
 tasktimeout: 300        #The total timeout [second] of everyone goroutine
+blackcmdlist:           #The dangerous black command list
+- rm /

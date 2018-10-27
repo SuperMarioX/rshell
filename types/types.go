@@ -4,6 +4,7 @@ package types
 type Cfg struct {
 	Concurrency int `yaml:"concurrency,omitempty"`
 	Tasktimeout int `yaml:"tasktimeout,omitempty"`
+	BlackCmdList []string `yaml:"blackcmdlist,omitempty"`
 }
 
 //Hosts config

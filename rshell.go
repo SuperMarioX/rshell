@@ -239,6 +239,14 @@ func interactiveRun() {
 				showInteractiveRunUsage()
 				goto retry
 			}
+			for _, cstr := range strings.Split(c, ";") {
+				for _, bstr := range cfg.BlackCmdList {
+					if strings.HasPrefix(strings.TrimSpace(cstr), bstr) {
+						fmt.Printf("DANGEROUS: Get a blacklist command [%s], DO NOT RUN.\n", strings.TrimSpace(cstr))
+						goto retry
+					}
+				}
+			}
 			t := Task{
 				Taskname:   d,
 				Hostgroups: h,
@@ -256,6 +264,14 @@ func interactiveRun() {
 				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
 				goto retry
+			}
+			for _, cstr := range strings.Split(c, ";") {
+				for _, bstr := range cfg.BlackCmdList {
+					if strings.HasPrefix(strings.TrimSpace(cstr), bstr) {
+						fmt.Printf("DANGEROUS: Get a blacklist command [%s], DO NOT RUN.\n", strings.TrimSpace(cstr))
+						goto retry
+					}
+				}
 			}
 			t := Task{
 				Taskname:   s,
