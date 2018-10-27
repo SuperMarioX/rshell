@@ -489,22 +489,11 @@ func run() error {
 		var newtaskresult Taskresult
 		newtaskresult.Name = taskresult.Name
 		for _, h := range hg.Hosts {
-			var found = false
 			for _, r := range taskresult.Results {
 				if r.Hostaddr == h {
 					newtaskresult.Results = append(newtaskresult.Results, r)
-					found = true
 					break
 				}
-			}
-			if !found {
-				tmp := Hostresult{
-					Hostaddr: h,
-					Error:    "TIMEOUT",
-					Stdout:   "",
-					Stderr:   "",
-				}
-				newtaskresult.Results = append(newtaskresult.Results, tmp)
 			}
 		}
 
