@@ -69,12 +69,12 @@ HOST [host address    ] --------------------------------------------------------
 
 STDERR =>
 
-ERROR =>
+SYSERR =>
 
 ```
 
 - STDERR：命令标准错误
-- ERROR：系统错误
+- SYSERR：系统错误
 
 ## 约束
 
