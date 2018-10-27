@@ -4,6 +4,7 @@ package types
 type Cfg struct {
 	Concurrency int `yaml:"concurrency,omitempty"`
 	Tasktimeout int `yaml:"tasktimeout,omitempty"`
+	CmdSeparator string `yaml:"cmdseparator,omitempty"`
 	BlackCmdList []string `yaml:"blackcmdlist,omitempty"`
 }
 

@@ -239,7 +239,7 @@ func interactiveRun() {
 				showInteractiveRunUsage()
 				goto retry
 			}
-			for _, cstr := range strings.Split(c, ";") {
+			for _, cstr := range strings.Split(c, cfg.CmdSeparator) {
 				for _, bstr := range cfg.BlackCmdList {
 					if strings.HasPrefix(strings.TrimSpace(cstr), bstr) {
 						fmt.Printf("DANGEROUS: Get a blacklist command [%s], DO NOT RUN.\n", strings.TrimSpace(cstr))
@@ -250,12 +250,12 @@ func interactiveRun() {
 			t := Task{
 				Taskname:   d,
 				Hostgroups: h,
-				Sshtasks:   strings.Split(c, ";"),
+				Sshtasks:   strings.Split(c, cfg.CmdSeparator),
 			}
 			tasks.Ts = append(tasks.Ts, t)
 			for _, value := range t.Sshtasks {
 				if strings.TrimSpace(value) != "" {
-					cset.Add(strings.TrimSpace(value) + ";")
+					cset.Add(strings.TrimSpace(value) + cfg.CmdSeparator)
 				}
 			}
 		case strings.HasPrefix(line, "sudo "):
@@ -265,7 +265,7 @@ func interactiveRun() {
 				showInteractiveRunUsage()
 				goto retry
 			}
-			for _, cstr := range strings.Split(c, ";") {
+			for _, cstr := range strings.Split(c, cfg.CmdSeparator) {
 				for _, bstr := range cfg.BlackCmdList {
 					if strings.HasPrefix(strings.TrimSpace(cstr), bstr) {
 						fmt.Printf("DANGEROUS: Get a blacklist command [%s], DO NOT RUN.\n", strings.TrimSpace(cstr))
@@ -277,12 +277,12 @@ func interactiveRun() {
 				Taskname:   s,
 				Hostgroups: h,
 				Sudoroot:   true,
-				Sshtasks:   strings.Split(c, ";"),
+				Sshtasks:   strings.Split(c, cfg.CmdSeparator),
 			}
 			tasks.Ts = append(tasks.Ts, t)
 			for _, value := range t.Sshtasks {
 				if strings.TrimSpace(value) != "" {
-					cset.Add(strings.TrimSpace(value) + ";")
+					cset.Add(strings.TrimSpace(value) + cfg.CmdSeparator)
 				}
 			}
 		case strings.HasPrefix(line, "download "):
