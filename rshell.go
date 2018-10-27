@@ -412,8 +412,9 @@ func run() error {
 		}
 
 		taskchs := make(chan Hostresult, len(hg.Hosts))
-		var taskresult Taskresult
+		defer close(taskchs)
 
+		var taskresult Taskresult
 		for _, host := range hg.Hosts {
 			limit <- true
 			go func(host string, sshport int, username, password, privatekey, passphrase, sudotype, sudopass string, cipers []string, task Task) {
@@ -484,8 +485,30 @@ func run() error {
 				}
 			}
 		}
-		utils.Output(taskresult)
-		close(taskchs)
+
+		var newtaskresult Taskresult
+		newtaskresult.Name = taskresult.Name
+		for _, h := range hg.Hosts {
+			var found = false
+			for _, r := range taskresult.Results {
+				if r.Hostaddr == h {
+					newtaskresult.Results = append(newtaskresult.Results, r)
+					found = true
+					break
+				}
+			}
+			if !found {
+				tmp := Hostresult{
+					Hostaddr: h,
+					Error:    "TIMEOUT",
+					Stdout:   "",
+					Stderr:   "",
+				}
+				newtaskresult.Results = append(newtaskresult.Results, tmp)
+			}
+		}
+
+		utils.Output(newtaskresult)
 	}
 
 	return nil
