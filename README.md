@@ -32,7 +32,7 @@ go build rshell.go
 ## 文件执行模式
 
 ```
-rshell.exe -f tasks.yaml
+rshell.exe -f examples/tasks.yaml
 ```
 
 注：examples存放示例文件tasks.yaml
@@ -66,7 +66,6 @@ ctrl c
 ```
 TASK [task name       ] ********************************************************
 HOST [host address    ] --------------------------------------------------------
-STDOUT =>
 
 STDERR =>
 
@@ -74,7 +73,6 @@ ERROR =>
 
 ```
 
-- STDOUT：命令标准输出
 - STDERR：命令标准错误
 - ERROR：系统错误
 
