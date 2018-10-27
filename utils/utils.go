@@ -30,9 +30,9 @@ func ChooseAuthmethod(as types.Auths, methodname string) (types.Auth) {
 }
 
 func Output(result types.Taskresult) {
-	color.Yellow("TASK [%-16s] ********************************************************\n", result.Name)
+	color.Yellow("TASK [%-16s] *******************************************************\n", result.Name)
 	for _, ret := range result.Results {
-		color.Green("HOST [%-16s] --------------------------------------------------------\n", ret.Hostaddr)
+		color.Green("HOST [%-16s] -------------------------------------------------------\n", ret.Hostaddr)
 		if ret.Stdout != "" {
 			fmt.Printf("%s\n", ret.Stdout)
 		}
