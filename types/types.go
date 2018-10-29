@@ -2,18 +2,19 @@ package types
 
 //Default config
 type Cfg struct {
-	Concurrency int `yaml:"concurrency,omitempty"`
-	Tasktimeout int `yaml:"tasktimeout,omitempty"`
-	CmdSeparator string `yaml:"cmdseparator,omitempty"`
+	Concurrency  int      `yaml:"concurrency,omitempty"`
+	Tasktimeout  int      `yaml:"tasktimeout,omitempty"`
+	CmdSeparator string   `yaml:"cmdseparator,omitempty"`
 	BlackCmdList []string `yaml:"blackcmdlist,omitempty"`
+	PromptString string   `yaml:"promptstring,omitempty"`
 }
 
 //Hosts config
 type Hostgroup struct {
-	Groupname string `yaml:"groupname,omitempty"`
-	Authmethod string `yaml:"authmethod,omitempty"`
-	Sshport int `yaml:"sshport,omitempty"`
-	Hosts []string `yaml:"hosts,omitempty"`
+	Groupname  string   `yaml:"groupname,omitempty"`
+	Authmethod string   `yaml:"authmethod,omitempty"`
+	Sshport    int      `yaml:"sshport,omitempty"`
+	Hosts      []string `yaml:"hosts,omitempty"`
 }
 type Hostgroups struct {
 	Hgs []Hostgroup `yaml:"hostgroups,omitempty"`
@@ -21,14 +22,14 @@ type Hostgroups struct {
 
 //Auth config
 type Auth struct {
-	Name string `yaml:"name,omitempty"`
-	Username string `yaml:"username,omitempty"`
-	Password string `yaml:"password,omitempty"`
-	Privatekey string `yaml:"privatekey,omitempty"`
-	Passphrase string `yaml:"passphrase,omitempty"`
-	Ciphers []string `yaml:"ciphers,omitempty"`
-	Sudotype string `yaml:"sudotype,omitempty"`
-	Sudopass string `yaml:"sudopass,omitempty"`
+	Name       string   `yaml:"name,omitempty"`
+	Username   string   `yaml:"username,omitempty"`
+	Password   string   `yaml:"password,omitempty"`
+	Privatekey string   `yaml:"privatekey,omitempty"`
+	Passphrase string   `yaml:"passphrase,omitempty"`
+	Ciphers    []string `yaml:"ciphers,omitempty"`
+	Sudotype   string   `yaml:"sudotype,omitempty"`
+	Sudopass   string   `yaml:"sudopass,omitempty"`
 }
 type Auths struct {
 	As []Auth `yaml:"authmethods,omitempty"`
@@ -36,17 +37,17 @@ type Auths struct {
 
 //Task config
 type Sftptask struct {
-	Type string `yaml:"type,omitempty"`
+	Type    string `yaml:"type,omitempty"`
 	SrcFile string `yaml:"srcfile,omitempty"`
-	DesDir string `yaml:"desdir,omitempty"`
+	DesDir  string `yaml:"desdir,omitempty"`
 }
 
 type Task struct {
-	Taskname string `yaml:"taskname,omitempty"`
-	Hostgroups string `yaml:"hostgroups,omitempty"`
-	Sudoroot bool `yaml:"sudoroot,omitempty"`
-	Sshtasks []string `yaml:"sshtasks,omitempty"`
-	Sftptasks []Sftptask `yaml:"sftptasks,omitempty"`
+	Taskname   string     `yaml:"taskname,omitempty"`
+	Hostgroups string     `yaml:"hostgroups,omitempty"`
+	Sudoroot   bool       `yaml:"sudoroot,omitempty"`
+	Sshtasks   []string   `yaml:"sshtasks,omitempty"`
+	Sftptasks  []Sftptask `yaml:"sftptasks,omitempty"`
 }
 
 type Tasks struct {
@@ -56,12 +57,12 @@ type Tasks struct {
 //Result
 type Hostresult struct {
 	Hostaddr string `yaml:"hostaddr,omitempty"`
-	Error string `yaml:"error,omitempyt"`
-	Stdout string `yaml:"stdout,omitempty"`
-	Stderr string `yaml:"stderr,omitempty"`
+	Error    string `yaml:"error,omitempyt"`
+	Stdout   string `yaml:"stdout,omitempty"`
+	Stderr   string `yaml:"stderr,omitempty"`
 }
 type Taskresult struct {
-	Name string `yaml:"name,omitempty"`
+	Name    string       `yaml:"name,omitempty"`
 	Results []Hostresult `yaml:"results,omitempty"`
 }
 type Tasksresults struct {

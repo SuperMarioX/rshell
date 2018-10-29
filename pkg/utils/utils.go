@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ChooseHostgroups(hgs types.Hostgroups, groupname string) (types.Hostgroup) {
+func ChooseHostgroups(hgs types.Hostgroups, groupname string) types.Hostgroup {
 	var result types.Hostgroup
 	for _, hg := range hgs.Hgs {
 		if hg.Groupname == groupname {
@@ -18,7 +18,7 @@ func ChooseHostgroups(hgs types.Hostgroups, groupname string) (types.Hostgroup) 
 	return result
 }
 
-func ChooseAuthmethod(as types.Auths, methodname string) (types.Auth) {
+func ChooseAuthmethod(as types.Auths, methodname string) types.Auth {
 	var result types.Auth
 	for _, a := range as.As {
 		if a.Name == methodname {
@@ -131,7 +131,7 @@ func GetDownload(hgs types.Hostgroups, line string) (download, hostgroup, src, d
 	if len(strings.Split(des, " ")) != 1 {
 		return "", "", "", "", fmt.Errorf("download too manay arguments")
 	}
-	return download, hostgroup, src, des,nil
+	return download, hostgroup, src, des, nil
 }
 
 func GetUpload(hgs types.Hostgroups, line string) (upload, hostgroup, src, des string, err error) {
@@ -165,5 +165,5 @@ func GetUpload(hgs types.Hostgroups, line string) (upload, hostgroup, src, des s
 	if len(strings.Split(des, " ")) != 1 {
 		return "", "", "", "", fmt.Errorf("upload too many arguments")
 	}
-	return upload, hostgroup, src, des,nil
+	return upload, hostgroup, src, des, nil
 }

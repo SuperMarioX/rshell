@@ -1,24 +1,19 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/chzyer/readline"
 	"github.com/luckywinds/lwssh"
+	"github.com/luckywinds/rshell/options"
+	"github.com/luckywinds/rshell/pkg/prompt"
+	"github.com/luckywinds/rshell/pkg/utils"
 	. "github.com/luckywinds/rshell/types"
-	"github.com/luckywinds/rshell/utils"
-	"gopkg.in/yaml.v2"
 	"io"
-	"io/ioutil"
 	"log"
-	"net"
-	"os"
 	"path"
 	"strings"
 	"time"
-	"github.com/scylladb/go-set/strset"
 )
-
 
 const (
 	Interactive string = "interactive"
@@ -27,96 +22,13 @@ const (
 	UPLOAD      string = "upload"
 )
 
-var (
-	cfgFile   = flag.String("cfg", path.Join(".rshell", "cfg.yaml"), "System Config file to read, Default: "+path.Join(".rshell", "cfg.yaml"))
-	hostsFile = flag.String("hosts", path.Join(".rshell", "hosts.yaml"), "Hosts Config file to read, Default: "+path.Join(".rshell", "hosts.yaml"))
-	authFile  = flag.String("auth", path.Join(".rshell", "auth.yaml"), "Auth Config file to read, Default: "+path.Join(".rshell", "hosts.yaml"))
-	script    = flag.String("f", "", "The script yaml.")
-)
-
-func initFlag() {
-	cmd := os.Args[0]
-	flag.Usage = func() {
-		fmt.Println(`Usage:`, cmd, `[<options>]
-
-Options:`)
-		flag.PrintDefaults()
-	}
-	flag.Parse()
-}
-
-var cfg Cfg
-
-func initCfg() {
-	c, err := ioutil.ReadFile(*cfgFile)
-	if err != nil {
-		log.Fatalf("Can not find cfg file[%s].", *cfgFile)
-	}
-	err = yaml.Unmarshal(c, &cfg)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-}
-
-var hostgroups Hostgroups
-
-func initHosts() {
-	h, err := ioutil.ReadFile(*hostsFile)
-	if err != nil {
-		log.Fatalf("Can not find hosts file[%s].", *hostsFile)
-	}
-	err = yaml.Unmarshal(h, &hostgroups)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-	for _, hg := range hostgroups.Hgs {
-		for _, h := range hg.Hosts {
-			if net.ParseIP(h) == nil {
-				log.Fatalf("IP illegal [%s/%s].", hg.Groupname, h)
-			}
-		}
-	}
-}
-
-var auths Auths
-
-func initAuths() {
-	a, err := ioutil.ReadFile(*authFile)
-	if err != nil {
-		log.Fatalf("Can not find auth file[%s].", *authFile)
-	}
-	err = yaml.Unmarshal(a, &auths)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-}
-
-var tasks Tasks
-
-func initArgs(playbook string) {
-	p, err := ioutil.ReadFile(playbook)
-	if err != nil {
-		log.Fatalf("Can not find script file[%s].", playbook)
-	}
-
-	err = yaml.Unmarshal(p, &tasks)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-}
+var cfg = options.GetCfg()
+var auths = options.GetAuths()
+var hostgroups = options.GetHostgroups()
+var tasks, isScriptMode = options.GetTasks()
 
 func main() {
-	os.Mkdir(".rshell", os.ModeDir)
-	initFlag()
-	initCfg()
-	initHosts()
-	initAuths()
-
-	if len(hostgroups.Hgs) == 0 {
-		fmt.Println("The hostgroup empty.")
-	}
-
-	if *script == "" {
+	if !isScriptMode {
 		interactiveRun()
 	} else {
 		scriptRun()
@@ -140,84 +52,15 @@ ctrl c
     --- Help`)
 }
 
-func listHgs() func(string) []string {
-	return func(string) []string {
-		hgs := []string{}
-		for _, value := range hostgroups.Hgs {
-			hgs = append(hgs, value.Groupname)
-		}
-		return hgs
-	}
-}
-
-var cset = strset.New()
-func listCmds() func(string) []string {
-	return func(string) []string {
-		return cset.List()
-	}
-}
-
-var sset = strset.New()
-func listSrcs() func(string) []string {
-	return func(string) []string {
-		return sset.List()
-	}
-}
-
-var dset = strset.New()
-func listDess() func(string) []string {
-	return func(string) []string {
-		return dset.List()
-	}
-}
-
-var completer = readline.NewPrefixCompleter(
-	readline.PcItem("do",
-		readline.PcItemDynamic(listHgs(),
-			readline.PcItemDynamic(listCmds(),
-				readline.PcItemDynamic(listCmds(),
-					readline.PcItemDynamic(listCmds(),
-						readline.PcItemDynamic(listCmds(),
-							readline.PcItemDynamic(listCmds(),
-								readline.PcItemDynamic(listCmds()))))))),
-	),
-	readline.PcItem("sudo",
-		readline.PcItemDynamic(listHgs(),
-			readline.PcItemDynamic(listCmds(),
-				readline.PcItemDynamic(listCmds(),
-					readline.PcItemDynamic(listCmds(),
-						readline.PcItemDynamic(listCmds(),
-							readline.PcItemDynamic(listCmds(),
-								readline.PcItemDynamic(listCmds()))))))),
-	),
-	readline.PcItem("download",
-		readline.PcItemDynamic(listHgs(),
-			readline.PcItemDynamic(listSrcs(),
-				readline.PcItemDynamic(listDess()))),
-	),
-	readline.PcItem("upload",
-		readline.PcItemDynamic(listHgs(),
-			readline.PcItemDynamic(listSrcs(),
-				readline.PcItemDynamic(listDess()))),
-	),
-)
-
 func interactiveRun() {
-	l, err := readline.NewEx(&readline.Config{
-		Prompt:              "\033[31mrshell:\033[0m ",
-		HistoryFile:         ".rshell/rshell.history",
-		AutoComplete:        completer,
-		InterruptPrompt:     "^C",
-		EOFPrompt:           "exit",
-		HistorySearchFold:   true,
-	})
+	l, err := prompt.NewReadline(cfg, hostgroups)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer l.Close()
 
 	for {
-		retry:
+	retry:
 		tasks = Tasks{}
 		line, err := l.Readline()
 		if err == readline.ErrInterrupt {
@@ -255,7 +98,7 @@ func interactiveRun() {
 			tasks.Ts = append(tasks.Ts, t)
 			for _, value := range t.Sshtasks {
 				if strings.TrimSpace(value) != "" {
-					cset.Add(strings.TrimSpace(value) + cfg.CmdSeparator)
+					prompt.AddCmd(strings.TrimSpace(value))
 				}
 			}
 		case strings.HasPrefix(line, "sudo "):
@@ -282,7 +125,7 @@ func interactiveRun() {
 			tasks.Ts = append(tasks.Ts, t)
 			for _, value := range t.Sshtasks {
 				if strings.TrimSpace(value) != "" {
-					cset.Add(strings.TrimSpace(value) + cfg.CmdSeparator)
+					prompt.AddCmd(strings.TrimSpace(value))
 				}
 			}
 		case strings.HasPrefix(line, "download "):
@@ -304,8 +147,8 @@ func interactiveRun() {
 				},
 			}
 			tasks.Ts = append(tasks.Ts, t)
-			sset.Add(strings.TrimSpace(sf))
-			dset.Add(strings.TrimSpace(dd))
+			prompt.AddSrcFile(strings.TrimSpace(sf))
+			prompt.AddDesDir(strings.TrimSpace(dd))
 		case strings.HasPrefix(line, "upload "):
 			u, h, sf, dd, err := utils.GetUpload(hostgroups, line)
 			if err != nil {
@@ -325,8 +168,8 @@ func interactiveRun() {
 				},
 			}
 			tasks.Ts = append(tasks.Ts, t)
-			sset.Add(strings.TrimSpace(sf))
-			dset.Add(strings.TrimSpace(dd))
+			prompt.AddSrcFile(strings.TrimSpace(sf))
+			prompt.AddDesDir(strings.TrimSpace(dd))
 		case line == "?":
 			showInteractiveRunUsage()
 			goto retry
@@ -344,10 +187,6 @@ func interactiveRun() {
 }
 
 func scriptRun() {
-	if *script == "" {
-		fmt.Println("The script yaml needed.")
-	}
-	initArgs(*script)
 	err := run()
 	if err != nil {
 		fmt.Printf("ERROR: %v\n", err)
