@@ -36,18 +36,20 @@ type Auths struct {
 }
 
 //Task config
-type Sftptask struct {
-	Type    string `yaml:"type,omitempty"`
-	SrcFile string `yaml:"srcfile,omitempty"`
-	DesDir  string `yaml:"desdir,omitempty"`
+type Subtask struct {
+	Name    string 	 `yaml:"name,omitempty"`
+	Mode    string   `yaml:"mode,omitempty"`
+	Sudo    bool     `yaml:"sudo,omitempty"`
+	Cmds    []string `yaml:"cmds,omitempty"`
+	FtpType string   `yaml:"ftptype,omitempty"`
+	SrcFile string   `yaml:"srcfile,omitempty"`
+	DesDir  string   `yaml:"desdir,omitempty"`
 }
 
 type Task struct {
-	Taskname   string     `yaml:"taskname,omitempty"`
-	Hostgroups string     `yaml:"hostgroups,omitempty"`
-	Sudoroot   bool       `yaml:"sudoroot,omitempty"`
-	Sshtasks   []string   `yaml:"sshtasks,omitempty"`
-	Sftptasks  []Sftptask `yaml:"sftptasks,omitempty"`
+	Taskname   string `yaml:"taskname,omitempty"`
+	Hostgroups string `yaml:"hostgroups,omitempty"`
+	Subtasks   []Subtask `yaml:"subtasks,omitempty"`
 }
 
 type Tasks struct {

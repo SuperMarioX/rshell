@@ -20,6 +20,8 @@ const (
 	SCRIPT      string = "script"
 	DOWNLOAD    string = "download"
 	UPLOAD      string = "upload"
+	SSH         string = "ssh"
+	SFTP        string = "sftp"
 )
 
 var cfg = options.GetCfg()
@@ -93,10 +95,17 @@ func interactiveRun() {
 			t := Task{
 				Taskname:   d,
 				Hostgroups: h,
-				Sshtasks:   strings.Split(c, cfg.CmdSeparator),
+				Subtasks:      []Subtask{
+					{
+						Name:    "DEFAULT",
+						Mode:    SSH,
+						Sudo:    false,
+						Cmds:    strings.Split(c, cfg.CmdSeparator),
+					},
+				},
 			}
 			tasks.Ts = append(tasks.Ts, t)
-			for _, value := range t.Sshtasks {
+			for _, value := range strings.Split(c, cfg.CmdSeparator) {
 				if strings.TrimSpace(value) != "" {
 					prompt.AddCmd(strings.TrimSpace(value))
 				}
@@ -119,11 +128,17 @@ func interactiveRun() {
 			t := Task{
 				Taskname:   s,
 				Hostgroups: h,
-				Sudoroot:   true,
-				Sshtasks:   strings.Split(c, cfg.CmdSeparator),
+				Subtasks:      []Subtask{
+					{
+						Name:    "DEFAULT",
+						Mode:    SSH,
+						Sudo:    true,
+						Cmds:    strings.Split(c, cfg.CmdSeparator),
+					},
+				},
 			}
 			tasks.Ts = append(tasks.Ts, t)
-			for _, value := range t.Sshtasks {
+			for _, value := range strings.Split(c, cfg.CmdSeparator) {
 				if strings.TrimSpace(value) != "" {
 					prompt.AddCmd(strings.TrimSpace(value))
 				}
@@ -138,9 +153,11 @@ func interactiveRun() {
 			t := Task{
 				Taskname:   d,
 				Hostgroups: h,
-				Sftptasks: []Sftptask{
+				Subtasks:      []Subtask{
 					{
-						Type:    d,
+						Name:    "DEFAULT",
+						Mode:    SFTP,
+						FtpType: DOWNLOAD,
 						SrcFile: sf,
 						DesDir:  dd,
 					},
@@ -159,9 +176,11 @@ func interactiveRun() {
 			t := Task{
 				Taskname:   u,
 				Hostgroups: h,
-				Sftptasks: []Sftptask{
+				Subtasks:      []Subtask{
 					{
-						Type:    u,
+						Name:    "DEFAULT",
+						Mode:    SFTP,
+						FtpType: UPLOAD,
 						SrcFile: sf,
 						DesDir:  dd,
 					},
@@ -187,9 +206,8 @@ func interactiveRun() {
 }
 
 func scriptRun() {
-	err := run()
-	if err != nil {
-		fmt.Printf("ERROR: %v\n", err)
+	if err := run(); err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -219,6 +237,9 @@ func run() error {
 		ciphers := auth.Ciphers
 		sshport := hg.Sshport
 		sudotype := auth.Sudotype
+		if sudotype == "" {
+			sudotype = "su"
+		}
 		sudopass := auth.Sudopass
 
 		if len(hg.Hosts) == 0 {
@@ -236,18 +257,8 @@ func run() error {
 		if password == "" && privatekey == "" {
 			return fmt.Errorf("%s", "Password and PrivateKey empty.")
 		}
-		if len(task.Sshtasks) == 0 && len(task.Sftptasks) == 0 {
-			return fmt.Errorf("%s", "SSH and SFTP Tasks empty.")
-		}
-		if len(task.Sshtasks) != 0 && task.Sshtasks[len(task.Sshtasks)-1] != "exit" && !strings.HasPrefix(task.Sshtasks[len(task.Sshtasks)-1], "exit ") {
-			task.Sshtasks = append(task.Sshtasks, "exit")
-		}
-		if len(task.Sshtasks) != 0 && task.Sudoroot {
-			if sudotype == "" {
-				sudotype = "su"
-			}
-			task.Sshtasks = append([]string{sudotype, sudopass}, task.Sshtasks...)
-			task.Sshtasks = append(task.Sshtasks, "exit")
+		if len(task.Subtasks) == 0 {
+			return fmt.Errorf("%s", "SSH or SFTP Tasks empty.")
 		}
 
 		taskchs := make(chan Hostresult, len(hg.Hosts))
@@ -260,39 +271,49 @@ func run() error {
 				var hostresult Hostresult
 				hostresult.Hostaddr = host
 
-				if len(task.Sshtasks) != 0 {
-					var stdout, stderr string
-					var err error
-					stdout, stderr, err = lwssh.SSHShell(host, sshport, username, password, privatekey, passphrase, ciphers, task.Sshtasks)
-					if err != nil {
-						hostresult.Error = err.Error()
-					}
-					hostresult.Stdout = stdout
-					hostresult.Stderr = stderr
-				}
-
-				if len(task.Sftptasks) != 0 {
-					hostresult.Stdout += "\n"
-					var err error
-					for _, value := range task.Sftptasks {
-						if value.Type == DOWNLOAD {
-							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, value.SrcFile, path.Join(value.DesDir, hg.Groupname))
+				var stdout, stderr string
+				var err error
+				for _, item := range task.Subtasks {
+					if item.Mode == SSH {
+						hostresult.Stdout += fmt.Sprintf("SSH  [%-16s] >\n", item.Name)
+						if len(item.Cmds) == 0 {
+							hostresult.Error = "The SSH cmds empty."
+							break
+						}
+						if item.Cmds[len(item.Cmds) - 1] != "exit" && !strings.HasPrefix(item.Cmds[len(item.Cmds) - 1], "exit ") {
+							item.Cmds = append(item.Cmds, "exit")
+						}
+						if item.Sudo {
+							item.Cmds = append([]string{sudotype, sudopass}, item.Cmds...)
+							item.Cmds = append(item.Cmds, "exit")
+						}
+						stdout, stderr, err = lwssh.SSHShell(host, sshport, username, password, privatekey, passphrase, ciphers, item.Cmds)
+						if err != nil {
+							hostresult.Error = err.Error()
+						}
+						hostresult.Stdout += stdout
+						hostresult.Stderr += stderr
+					} else if item.Mode == SFTP {
+						hostresult.Stdout += fmt.Sprintf("SFTP [%-16s] >\n", item.Name)
+						if item.FtpType == DOWNLOAD {
+							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, item.SrcFile, path.Join(item.DesDir, hg.Groupname))
 							if err == nil {
-								hostresult.Stdout += "DOWNLOAD Success [" + value.SrcFile + " -> " + path.Join(value.DesDir, hg.Groupname) + "]\n"
+								hostresult.Stdout += "DOWNLOAD Success [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "]"
 							} else {
-								hostresult.Error += "DOWNLOAD Failed [" + value.SrcFile + " -> " + path.Join(value.DesDir, hg.Groupname) + "] " + err.Error() + "\n"
+								hostresult.Error += "DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] " + err.Error() + ""
 							}
-						} else if value.Type == UPLOAD {
-							err = lwssh.ScpUpload(host, sshport, username, password, privatekey, passphrase, ciphers, value.SrcFile, value.DesDir)
+						} else if item.FtpType == UPLOAD {
+							err = lwssh.ScpUpload(host, sshport, username, password, privatekey, passphrase, ciphers, item.SrcFile, item.DesDir)
 							if err == nil {
-								hostresult.Stdout += "UPLOAD Success [" + value.SrcFile + " -> " + value.DesDir + "]\n"
+								hostresult.Stdout += "UPLOAD Success [" + item.SrcFile + " -> " + item.DesDir + "]"
 							} else {
-								hostresult.Error += "UPLOAD Failed [" + value.SrcFile + " -> " + value.DesDir + "] " + err.Error() + "\n"
+								hostresult.Error += "UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] " + err.Error() + ""
 							}
 						} else {
-							err = fmt.Errorf("%s", "")
-							hostresult.Error += "SFTP Failed. Not support type[" + value.Type + "], not in [download/upload].\n"
+							hostresult.Error += "SFTP Failed. Not support ftp type[" + item.FtpType + "], not in [download/upload].\n"
 						}
+					} else {
+						hostresult.Error += "TASK Failed. Not support task mode[" + item.Mode + "], not in [ssh/sftp].\n"
 					}
 				}
 
@@ -310,29 +331,24 @@ func run() error {
 				break
 			}
 		}
-		if len(taskresult.Results) != len(hg.Hosts) {
-			m := make(map[string]bool)
-			for _, v := range taskresult.Results {
-				m[v.Hostaddr] = true
-			}
-			for _, v := range hg.Hosts {
-				if _, ok := m[v]; !ok {
-					var h Hostresult
-					h.Hostaddr = v
-					h.Error = "TIMEOUT"
-					taskresult.Results = append(taskresult.Results, h)
-				}
-			}
+
+		m := make(map[string]Hostresult)
+		for _, v := range taskresult.Results {
+			m[v.Hostaddr] = v
 		}
 
 		var newtaskresult Taskresult
 		newtaskresult.Name = taskresult.Name
 		for _, h := range hg.Hosts {
-			for _, r := range taskresult.Results {
-				if r.Hostaddr == h {
-					newtaskresult.Results = append(newtaskresult.Results, r)
-					break
-				}
+			if _, ok := m[h]; ok {
+				newtaskresult.Results = append(newtaskresult.Results, m[h])
+			} else {
+				newtaskresult.Results = append(newtaskresult.Results, Hostresult{
+					Hostaddr: h,
+					Error:    "TIMEOUT",
+					Stdout:   "",
+					Stderr:   "",
+				})
 			}
 		}
 
