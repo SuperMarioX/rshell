@@ -220,6 +220,10 @@ func run() error {
 	defer close(limit)
 
 	for _, task := range tasks.Ts {
+		if task.Name == "" || task.Hostgroup == "" {
+			log.Fatal("The task's name or hostgroup empty.")
+		}
+		
 		hg := utils.ChooseHostgroups(hostgroups, task.Hostgroup)
 		if hg.Groupname == "" {
 			return fmt.Errorf("%s", "The hostgroup not found.")
