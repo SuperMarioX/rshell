@@ -223,7 +223,7 @@ func run() error {
 		if task.Name == "" || task.Hostgroup == "" {
 			log.Fatal("The task's name or hostgroup empty.")
 		}
-		
+
 		hg := utils.ChooseHostgroups(hostgroups, task.Hostgroup)
 		if hg.Groupname == "" {
 			return fmt.Errorf("%s", "The hostgroup not found.")
@@ -279,7 +279,7 @@ func run() error {
 				var err error
 				for _, item := range task.Subtasks {
 					if item.Mode == SSH {
-						hostresult.Stdout += fmt.Sprintf("SSH  [%-16s] >\n", item.Name)
+						hostresult.Stdout += fmt.Sprintf("SSH  [%-16s] :\n", item.Name)
 						if len(item.Cmds) == 0 {
 							hostresult.Error = "The SSH cmds empty."
 							break
@@ -298,20 +298,20 @@ func run() error {
 						hostresult.Stdout += stdout
 						hostresult.Stderr += stderr
 					} else if item.Mode == SFTP {
-						hostresult.Stdout += fmt.Sprintf("SFTP [%-16s] >\n", item.Name)
+						hostresult.Stdout += fmt.Sprintf("SFTP [%-16s] :\n", item.Name)
 						if item.FtpType == DOWNLOAD {
 							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, item.SrcFile, path.Join(item.DesDir, hg.Groupname))
 							if err == nil {
-								hostresult.Stdout += "DOWNLOAD Success [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "]"
+								hostresult.Stdout += "DOWNLOAD Success [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "]\n"
 							} else {
-								hostresult.Error += "DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] " + err.Error() + ""
+								hostresult.Error += "DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] " + err.Error() + "\n"
 							}
 						} else if item.FtpType == UPLOAD {
 							err = lwssh.ScpUpload(host, sshport, username, password, privatekey, passphrase, ciphers, item.SrcFile, item.DesDir)
 							if err == nil {
-								hostresult.Stdout += "UPLOAD Success [" + item.SrcFile + " -> " + item.DesDir + "]"
+								hostresult.Stdout += "UPLOAD Success [" + item.SrcFile + " -> " + item.DesDir + "]\n"
 							} else {
-								hostresult.Error += "UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] " + err.Error() + ""
+								hostresult.Error += "UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] " + err.Error() + "\n"
 							}
 						} else {
 							hostresult.Error += "SFTP Failed. Not support ftp type[" + item.FtpType + "], not in [download/upload].\n"
@@ -328,9 +328,15 @@ func run() error {
 
 		for i := 0; i < len(hg.Hosts); i++ {
 			taskresult.Name = task.Name
+			if cfg.Outputintime {
+				utils.OutputTaskHeader(taskresult.Name)
+			}
 			select {
 			case res := <-taskchs:
 				taskresult.Results = append(taskresult.Results, res)
+				if cfg.Outputintime {
+					utils.OutputHostResult(res)
+				}
 			case <-time.After(time.Duration(cfg.Tasktimeout) * time.Second):
 				break
 			}
@@ -347,16 +353,22 @@ func run() error {
 			if _, ok := m[h]; ok {
 				newtaskresult.Results = append(newtaskresult.Results, m[h])
 			} else {
-				newtaskresult.Results = append(newtaskresult.Results, Hostresult{
+				t := Hostresult{
 					Hostaddr: h,
 					Error:    "TIMEOUT",
 					Stdout:   "",
 					Stderr:   "",
-				})
+				}
+				newtaskresult.Results = append(newtaskresult.Results, t)
+				if cfg.Outputintime {
+					utils.OutputHostResult(t)
+				}
 			}
 		}
 
-		utils.Output(newtaskresult)
+		if !cfg.Outputintime {
+			utils.Output(newtaskresult)
+		}
 	}
 
 	return nil

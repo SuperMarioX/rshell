@@ -29,24 +29,31 @@ func ChooseAuthmethod(as types.Auths, methodname string) types.Auth {
 	return result
 }
 
+func OutputTaskHeader(name string) {
+	color.Yellow("TASK [%-16s] *******************************************************\n", name)
+}
+func OutputHostResult(result types.Hostresult) {
+	color.Green("HOST [%-16s] =======================================================\n", result.Hostaddr)
+	if result.Stdout != "" {
+		fmt.Printf("%s\n", result.Stdout)
+	}
+	if result.Stderr != "" {
+		color.Red("%s\n", "STDERR =>")
+		fmt.Printf("%s\n", result.Stderr)
+	}
+	if result.Error != "" {
+		color.Red("%s\n", "SYSERR =>")
+		fmt.Printf("%s\n", result.Error)
+	}
+	if result.Stdout == "" && result.Stderr == "" && result.Error == "" {
+		fmt.Println()
+	}
+}
+
 func Output(result types.Taskresult) {
-	color.Yellow("TASK [%-16s] *******************************************************\n", result.Name)
+	OutputTaskHeader(result.Name)
 	for _, ret := range result.Results {
-		color.Green("HOST [%-16s] =======================================================\n", ret.Hostaddr)
-		if ret.Stdout != "" {
-			fmt.Printf("%s\n", ret.Stdout)
-		}
-		if ret.Stderr != "" {
-			color.Red("%s\n", "STDERR =>")
-			fmt.Printf("%s\n", ret.Stderr)
-		}
-		if ret.Error != "" {
-			color.Red("%s\n", "SYSERR =>")
-			fmt.Printf("%s\n", ret.Error)
-		}
-		if ret.Stdout == "" && ret.Stderr == "" && ret.Error == "" {
-			fmt.Println()
-		}
+		OutputHostResult(ret)
 	}
 }
 

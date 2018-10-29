@@ -7,6 +7,7 @@ type Cfg struct {
 	CmdSeparator string   `yaml:"cmdseparator,omitempty"`
 	BlackCmdList []string `yaml:"blackcmdlist,omitempty"`
 	PromptString string   `yaml:"promptstring,omitempty"`
+	Outputintime bool     `yaml:"outputintime,omitempty"`
 }
 
 //Hosts config
