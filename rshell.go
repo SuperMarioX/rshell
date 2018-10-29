@@ -279,7 +279,7 @@ func run() error {
 				var err error
 				for _, item := range task.Subtasks {
 					if item.Mode == SSH {
-						hostresult.Stdout += fmt.Sprintf("SSH  [%-30s] -----------------------------------------\n", item.Name)
+						hostresult.Stdout += fmt.Sprintf("SSH  [%-16s] -------------------------------------------------------\n", item.Name)
 						if len(item.Cmds) == 0 {
 							hostresult.Error = "The SSH cmds empty."
 							break
@@ -298,7 +298,7 @@ func run() error {
 						hostresult.Stdout += stdout
 						hostresult.Stderr += stderr
 					} else if item.Mode == SFTP {
-						hostresult.Stdout += fmt.Sprintf("FTP  [%-30s] -----------------------------------------\n", item.Name)
+						hostresult.Stdout += fmt.Sprintf("FTP  [%-16s] -------------------------------------------------------\n", item.Name)
 						if item.FtpType == DOWNLOAD {
 							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, item.SrcFile, path.Join(item.DesDir, hg.Groupname))
 							if err == nil {
