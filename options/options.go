@@ -49,6 +49,18 @@ func initCfg() {
 }
 func GetCfg() Cfg {
 	initCfg()
+	if cfg.Concurrency == 0 {
+		cfg.Concurrency = 6
+	}
+	if cfg.Tasktimeout == 0 {
+		cfg.Tasktimeout = 300
+	}
+	if cfg.CmdSeparator == "" {
+		cfg.CmdSeparator = ";"
+	}
+	if cfg.PromptString == "" {
+		cfg.PromptString = "rshell: "
+	}
 	return cfg
 }
 
