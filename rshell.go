@@ -298,7 +298,7 @@ func run() error {
 						hostresult.Stdout += stdout
 						hostresult.Stderr += stderr
 					} else if item.Mode == SFTP {
-						hostresult.Stdout += fmt.Sprintf("[SFTP] %s :\n", item.Name)
+						hostresult.Stdout += fmt.Sprintf("[FTP] %s :\n", item.Name)
 						if item.FtpType == DOWNLOAD {
 							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, item.SrcFile, path.Join(item.DesDir, hg.Groupname))
 							if err == nil {
