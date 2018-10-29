@@ -47,8 +47,8 @@ type Subtask struct {
 }
 
 type Task struct {
-	Taskname   string `yaml:"taskname,omitempty"`
-	Hostgroups string `yaml:"hostgroups,omitempty"`
+	Name   string `yaml:"name,omitempty"`
+	Hostgroup string `yaml:"hostgroup,omitempty"`
 	Subtasks   []Subtask `yaml:"subtasks,omitempty"`
 }
 

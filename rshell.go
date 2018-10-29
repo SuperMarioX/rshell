@@ -93,8 +93,8 @@ func interactiveRun() {
 				}
 			}
 			t := Task{
-				Taskname:   d,
-				Hostgroups: h,
+				Name:   d,
+				Hostgroup: h,
 				Subtasks:      []Subtask{
 					{
 						Name:    "DEFAULT",
@@ -126,8 +126,8 @@ func interactiveRun() {
 				}
 			}
 			t := Task{
-				Taskname:   s,
-				Hostgroups: h,
+				Name:   s,
+				Hostgroup: h,
 				Subtasks:      []Subtask{
 					{
 						Name:    "DEFAULT",
@@ -151,8 +151,8 @@ func interactiveRun() {
 				goto retry
 			}
 			t := Task{
-				Taskname:   d,
-				Hostgroups: h,
+				Name:   d,
+				Hostgroup: h,
 				Subtasks:      []Subtask{
 					{
 						Name:    "DEFAULT",
@@ -174,8 +174,8 @@ func interactiveRun() {
 				goto retry
 			}
 			t := Task{
-				Taskname:   u,
-				Hostgroups: h,
+				Name:   u,
+				Hostgroup: h,
 				Subtasks:      []Subtask{
 					{
 						Name:    "DEFAULT",
@@ -220,7 +220,7 @@ func run() error {
 	defer close(limit)
 
 	for _, task := range tasks.Ts {
-		hg := utils.ChooseHostgroups(hostgroups, task.Hostgroups)
+		hg := utils.ChooseHostgroups(hostgroups, task.Hostgroup)
 		if hg.Groupname == "" {
 			return fmt.Errorf("%s", "The hostgroup not found.")
 		}
@@ -323,7 +323,7 @@ func run() error {
 		}
 
 		for i := 0; i < len(hg.Hosts); i++ {
-			taskresult.Name = task.Taskname
+			taskresult.Name = task.Name
 			select {
 			case res := <-taskchs:
 				taskresult.Results = append(taskresult.Results, res)
