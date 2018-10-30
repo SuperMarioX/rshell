@@ -54,6 +54,7 @@ type Task struct {
 }
 
 type Tasks struct {
+	Env    map[string]interface{} `yaml:"env,omitempty"`
 	Ts []Task `yaml:"tasks,omitempty"`
 }
 

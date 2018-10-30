@@ -5,6 +5,7 @@ import (
 	"fmt"
 	. "github.com/luckywinds/rshell/types"
 	"gopkg.in/yaml.v2"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net"
@@ -138,11 +139,35 @@ func initTasks(scriptFile string) {
 		log.Fatalf("error: %v", err)
 	}
 }
+
+var tempScript = ".rshell/rshell.tmp"
+
+func templateScript(script string) {
+	t, err := template.ParseFiles(script)
+	if err != nil {
+		log.Fatalf("Parser template script file [%s] failed.", script)
+	}
+
+	f, err := os.Create(tempScript)
+	if err != nil {
+		log.Fatal("Create temp script file failed.")
+	}
+	defer f.Close()
+
+	if err := t.Execute(f, tasks.Env); err != nil {
+		log.Fatal("Parser template script file task failed.")
+	}
+}
+
 func GetTasks() (Tasks, bool) {
 	if *script != "" {
 		initTasks(*script)
 		if len(tasks.Ts) == 0 {
 			log.Fatal("The tasks empty.")
+		}
+		if len(tasks.Env) != 0 {
+			templateScript(*script)
+			initTasks(tempScript)
 		}
 		return tasks, true
 	} else {
