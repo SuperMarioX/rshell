@@ -1,11 +1,17 @@
 package types
 
 //Default config
+
+type BlackCmd struct {
+	Cmd string `yaml:"cmd,omitempty"`
+	CmdPrefix string `yaml:"cmdprefix,omitempty"`
+}
+
 type Cfg struct {
 	Concurrency  int      `yaml:"concurrency,omitempty"`
 	Tasktimeout  int      `yaml:"tasktimeout,omitempty"`
 	CmdSeparator string   `yaml:"cmdseparator,omitempty"`
-	BlackCmdList []string `yaml:"blackcmdlist,omitempty"`
+	BlackCmdList []BlackCmd `yaml:"blackcmdlist,omitempty"`
 	PromptString string   `yaml:"promptstring,omitempty"`
 	Outputintime bool     `yaml:"outputintime,omitempty"`
 }

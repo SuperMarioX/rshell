@@ -5,6 +5,7 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/luckywinds/lwssh"
 	"github.com/luckywinds/rshell/options"
+	"github.com/luckywinds/rshell/pkg/filters"
 	"github.com/luckywinds/rshell/pkg/prompt"
 	"github.com/luckywinds/rshell/pkg/utils"
 	. "github.com/luckywinds/rshell/types"
@@ -84,14 +85,6 @@ func interactiveRun() {
 				showInteractiveRunUsage()
 				goto retry
 			}
-			for _, cstr := range strings.Split(c, cfg.CmdSeparator) {
-				for _, bstr := range cfg.BlackCmdList {
-					if strings.HasPrefix(strings.TrimSpace(cstr), bstr) {
-						fmt.Printf("DANGEROUS: Get a blacklist command [%s], DO NOT RUN.\n", strings.TrimSpace(cstr))
-						goto retry
-					}
-				}
-			}
 			t := Task{
 				Name:   d,
 				Hostgroup: h,
@@ -116,14 +109,6 @@ func interactiveRun() {
 				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
 				goto retry
-			}
-			for _, cstr := range strings.Split(c, cfg.CmdSeparator) {
-				for _, bstr := range cfg.BlackCmdList {
-					if strings.HasPrefix(strings.TrimSpace(cstr), bstr) {
-						fmt.Printf("DANGEROUS: Get a blacklist command [%s], DO NOT RUN.\n", strings.TrimSpace(cstr))
-						goto retry
-					}
-				}
 			}
 			t := Task{
 				Name:   s,
@@ -283,8 +268,14 @@ func run() error {
 							hostresult.Stdout += fmt.Sprintf("SSH  [%-16s] -------------------------------------------------------\n", item.Name)
 						}
 						if len(item.Cmds) == 0 {
-							hostresult.Error = "The SSH cmds empty."
+							hostresult.Error += "The SSH cmds empty.\n"
 							break
+						}
+						for _, cstr := range item.Cmds {
+							if filters.IsBlackCmd(cstr, cfg.BlackCmdList) {
+								hostresult.Error += fmt.Sprintf("DANGEROUS: Get a blacklist command [%s], DO NOT RUN.\n", cstr)
+								goto breakfor
+							}
 						}
 						if item.Cmds[len(item.Cmds) - 1] != "exit" && !strings.HasPrefix(item.Cmds[len(item.Cmds) - 1], "exit ") {
 							item.Cmds = append(item.Cmds, "exit")
@@ -324,6 +315,7 @@ func run() error {
 						hostresult.Error += "TASK Failed. Not support task mode[" + item.Mode + "], not in [ssh/sftp].\n"
 					}
 				}
+				breakfor:
 
 				taskchs <- hostresult
 				<-limit
