@@ -4,4 +4,5 @@ cmdseparator: ";"       #The command separator
 promptstring: "rshell: " #The system prompt string
 outputintime: true      #The output in time, Default: true
 blackcmdlist:           #The dangerous black command list
-- rm /
+- cmd: rm /
+  cmdprefix: rm /

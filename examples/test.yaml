@@ -1,3 +1,6 @@
+env:
+  abc: 123
+
 tasks:
 - name: test all
   hostgroup: test-group01
@@ -7,6 +10,7 @@ tasks:
     cmds:
     - whoami
     - date
+    - echo {{.abc}}
 
   - name: test sudo
     mode: ssh
@@ -14,18 +18,19 @@ tasks:
     cmds:
     - whoami
     - date
-    
+    - rm /abc
+
   - name: test upload
     mode: sftp
     ftptype: upload
     srcfile: tasks/test.yaml
-    desdir: . 
+    desdir: .
 
   - name: check upload
     mode: ssh
     cmds:
     - ls -alh test.yaml
-    
+
   - name: test download
     mode: sftp
     ftptype: download
