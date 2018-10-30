@@ -7,28 +7,6 @@ import (
 	"strings"
 )
 
-func ChooseHostgroups(hgs types.Hostgroups, groupname string) types.Hostgroup {
-	var result types.Hostgroup
-	for _, hg := range hgs.Hgs {
-		if hg.Groupname == groupname {
-			result = hg
-			break
-		}
-	}
-	return result
-}
-
-func ChooseAuthmethod(as types.Auths, methodname string) types.Auth {
-	var result types.Auth
-	for _, a := range as.As {
-		if a.Name == methodname {
-			result = a
-			break
-		}
-	}
-	return result
-}
-
 func OutputTaskHeader(name string) {
 	color.Yellow("TASK [%-16s] *******************************************************\n", name)
 }
@@ -57,7 +35,7 @@ func Output(result types.Taskresult) {
 	}
 }
 
-func GetDo(hgs types.Hostgroups, line string) (do, hostgroup, cmd string, err error) {
+func GetDo(hgm map[string]types.Hostgroup, line string) (do, hostgroup, cmd string, err error) {
 	ds := strings.SplitN(strings.TrimSpace(line), " ", 2)
 	if len(ds) != 2 {
 		return "", "", "", fmt.Errorf("%s", "do need arguments")
@@ -68,7 +46,7 @@ func GetDo(hgs types.Hostgroups, line string) (do, hostgroup, cmd string, err er
 	if len(hs) != 2 {
 		return "", "", "", fmt.Errorf("%s", "do need arguments")
 	}
-	hg := ChooseHostgroups(hgs, hs[0])
+	hg := hgm[hs[0]]
 	if hg.Groupname == "" {
 		return "", "", "", fmt.Errorf("do need hostgroup")
 	}
@@ -82,7 +60,7 @@ func GetDo(hgs types.Hostgroups, line string) (do, hostgroup, cmd string, err er
 	return do, hostgroup, cmd, nil
 }
 
-func GetSudo(hgs types.Hostgroups, line string) (sudo, hostgroup, cmd string, err error) {
+func GetSudo(hgm map[string]types.Hostgroup, line string) (sudo, hostgroup, cmd string, err error) {
 	ss := strings.SplitN(strings.TrimSpace(line), " ", 2)
 	if len(ss) != 2 {
 		return "", "", "", fmt.Errorf("%s", "sudo need arguments")
@@ -93,7 +71,7 @@ func GetSudo(hgs types.Hostgroups, line string) (sudo, hostgroup, cmd string, er
 	if len(hs) != 2 {
 		return "", "", "", fmt.Errorf("%s", "sudo need arguments")
 	}
-	hg := ChooseHostgroups(hgs, hs[0])
+	hg := hgm[hs[0]]
 	if hg.Groupname == "" {
 		return "", "", "", fmt.Errorf("sudo need hostgroup")
 	}
@@ -107,7 +85,7 @@ func GetSudo(hgs types.Hostgroups, line string) (sudo, hostgroup, cmd string, er
 	return sudo, hostgroup, cmd, nil
 }
 
-func GetDownload(hgs types.Hostgroups, line string) (download, hostgroup, src, des string, err error) {
+func GetDownload(hgm map[string]types.Hostgroup, line string) (download, hostgroup, src, des string, err error) {
 	ds := strings.SplitN(strings.TrimSpace(line), " ", 2)
 	if len(ds) != 2 {
 		return "", "", "", "", fmt.Errorf("%s", "download need arguments")
@@ -118,7 +96,7 @@ func GetDownload(hgs types.Hostgroups, line string) (download, hostgroup, src, d
 	if len(hs) != 2 {
 		return "", "", "", "", fmt.Errorf("%s", "download need arguments")
 	}
-	hg := ChooseHostgroups(hgs, hs[0])
+	hg := hgm[hs[0]]
 	if hg.Groupname == "" {
 		return "", "", "", "", fmt.Errorf("download need hostgroup")
 	}
@@ -141,7 +119,7 @@ func GetDownload(hgs types.Hostgroups, line string) (download, hostgroup, src, d
 	return download, hostgroup, src, des, nil
 }
 
-func GetUpload(hgs types.Hostgroups, line string) (upload, hostgroup, src, des string, err error) {
+func GetUpload(hgm map[string]types.Hostgroup, line string) (upload, hostgroup, src, des string, err error) {
 	us := strings.SplitN(strings.TrimSpace(line), " ", 2)
 	if len(us) != 2 {
 		return "", "", "", "", fmt.Errorf("%s", "upload need arguments")
@@ -152,7 +130,7 @@ func GetUpload(hgs types.Hostgroups, line string) (upload, hostgroup, src, des s
 	if len(hs) != 2 {
 		return "", "", "", "", fmt.Errorf("%s", "upload need arguments")
 	}
-	hg := ChooseHostgroups(hgs, hs[0])
+	hg := hgm[hs[0]]
 	if hg.Groupname == "" {
 		return "", "", "", "", fmt.Errorf("upload need hostgroup")
 	}

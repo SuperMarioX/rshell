@@ -25,8 +25,8 @@ const (
 )
 
 var cfg = options.GetCfg()
-var auths = options.GetAuths()
-var hostgroups = options.GetHostgroups()
+var auths, authsMap = options.GetAuths()
+var hostgroups, hostgroupsMap = options.GetHostgroups()
 var tasks, isScriptMode = options.GetTasks()
 
 func main() {
@@ -78,7 +78,7 @@ func interactiveRun() {
 		line = strings.TrimSpace(line)
 		switch {
 		case strings.HasPrefix(line, "do "):
-			d, h, c, err := utils.GetDo(hostgroups, line)
+			d, h, c, err := utils.GetDo(hostgroupsMap, line)
 			if err != nil {
 				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
@@ -111,7 +111,7 @@ func interactiveRun() {
 				}
 			}
 		case strings.HasPrefix(line, "sudo "):
-			s, h, c, err := utils.GetSudo(hostgroups, line)
+			s, h, c, err := utils.GetSudo(hostgroupsMap, line)
 			if err != nil {
 				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
@@ -144,7 +144,7 @@ func interactiveRun() {
 				}
 			}
 		case strings.HasPrefix(line, "download "):
-			d, h, sf, dd, err := utils.GetDownload(hostgroups, line)
+			d, h, sf, dd, err := utils.GetDownload(hostgroupsMap, line)
 			if err != nil {
 				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
@@ -167,7 +167,7 @@ func interactiveRun() {
 			prompt.AddSrcFile(strings.TrimSpace(sf))
 			prompt.AddDesDir(strings.TrimSpace(dd))
 		case strings.HasPrefix(line, "upload "):
-			u, h, sf, dd, err := utils.GetUpload(hostgroups, line)
+			u, h, sf, dd, err := utils.GetUpload(hostgroupsMap, line)
 			if err != nil {
 				fmt.Printf("%v\n", err.Error())
 				showInteractiveRunUsage()
@@ -224,12 +224,12 @@ func run() error {
 			log.Fatal("The task's name or hostgroup empty.")
 		}
 
-		hg := utils.ChooseHostgroups(hostgroups, task.Hostgroup)
+		hg := hostgroupsMap[task.Hostgroup]
 		if hg.Groupname == "" {
 			return fmt.Errorf("%s", "The hostgroup not found.")
 		}
 
-		auth := utils.ChooseAuthmethod(auths, hg.Authmethod)
+		auth := authsMap[hg.Authmethod]
 		if auth.Name == "" {
 			return fmt.Errorf("%s", "The auth method not found.")
 		}

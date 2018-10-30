@@ -83,12 +83,19 @@ func initHostgroups() {
 		}
 	}
 }
-func GetHostgroups() Hostgroups {
+func GetHostgroups() (Hostgroups, map[string]Hostgroup) {
 	initHostgroups()
 	if len(hostgroups.Hgs) == 0 {
 		log.Fatal("The hostgroups empty.")
 	}
-	return hostgroups
+	var ret = make(map[string]Hostgroup)
+	for _, value := range hostgroups.Hgs {
+		ret[value.Groupname] = value
+	}
+	if len(hostgroups.Hgs) != len(ret) {
+		log.Fatal("There is duplicate hostgroup.")
+	}
+	return hostgroups, ret
 }
 
 var auths Auths
@@ -103,12 +110,19 @@ func initAuths() {
 		log.Fatalf("error: %v", err)
 	}
 }
-func GetAuths() Auths {
+func GetAuths() (Auths, map[string]Auth) {
 	initAuths()
 	if len(auths.As) == 0 {
 		log.Fatal("The auths empty.")
 	}
-	return auths
+	var ret = make(map[string]Auth)
+	for _, value := range auths.As {
+		ret[value.Name] = value
+	}
+	if len(auths.As) != len(ret) {
+		log.Fatal("There is duplicate auth.")
+	}
+	return auths, ret
 }
 
 var tasks Tasks
