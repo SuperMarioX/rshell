@@ -34,10 +34,10 @@ go build rshell.go
 ## 文件执行模式
 
 ```
-rshell.exe -f examples/tasks.yaml
+rshell.exe -f examples/test.yaml
 ```
 
-注：examples存放示例文件tasks.yaml
+注：examples存放示例文件test.yaml
 
 ## 交互式命令行执行模式
 
@@ -78,9 +78,6 @@ SYSERR =>
 - STDERR：命令标准错误
 - SYSERR：系统错误
 
-## 约束
-
-- 同一task下的sshtasks和sftptasks无关联关系（默认先执行sshtasks）
 
 ## 引用
 
@@ -89,3 +86,7 @@ SYSERR =>
 - "gopkg.in/yaml.v2"
 - "github.com/fatih/color"
 - "github.com/scylladb/go-set/strset"
+
+变更说明：
+
+1.1
