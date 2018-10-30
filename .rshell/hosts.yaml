@@ -1,5 +1,5 @@
 hostgroups:
-- groupname: hostgroup01                  #Hostgroup name
+- groupname: test-group01                 #Hostgroup name
   authmethod: alpha-env-ttt-key-su        #Hostgrout auth method name which in auth.yaml
   sshport: 22                             #SSH port, default: 22
   hosts:

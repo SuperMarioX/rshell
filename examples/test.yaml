@@ -1,0 +1,34 @@
+tasks:
+- name: test all
+  hostgroup: test-group01
+  subtasks:
+  - name: test do
+    mode: ssh
+    cmds:
+    - whoami
+    - date
+
+  - name: test sudo
+    mode: ssh
+    sudo: true
+    cmds:
+    - whoami
+    - date
+    
+  - name: test upload
+    mode: sftp
+    ftptype: upload
+    srcfile: tasks/test.yaml
+    desdir: . 
+
+  - name: check upload
+    mode: ssh
+    cmds:
+    - ls -alh test.yaml
+    
+  - name: test download
+    mode: sftp
+    ftptype: download
+    srcfile: test.yaml
+    desdir: . 
+
