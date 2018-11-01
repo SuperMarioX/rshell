@@ -53,18 +53,28 @@ func GetCfg() Cfg {
 	initCfg()
 	if cfg.Concurrency == 0 {
 		cfg.Concurrency = 6
+	} else if cfg.Concurrency < 0 || cfg.Concurrency > 100 {
+		log.Fatalf("Config Concurrency illegal [%d] not in (0, 100].", cfg.Concurrency)
 	}
 	if cfg.Tasktimeout == 0 {
 		cfg.Tasktimeout = 300
+	} else if cfg.Tasktimeout < 0 || cfg.Tasktimeout > 86400 {
+		log.Fatalf("Config Tasktimeout illegal [%d] not in (0, 86400].", cfg.Tasktimeout)
 	}
 	if cfg.CmdSeparator == "" {
 		cfg.CmdSeparator = ";"
+	} else if len(cfg.CmdSeparator) != 1 {
+		log.Fatalf("Config CmdSeparator illegal [%s] not one char.", cfg.CmdSeparator)
 	}
 	if cfg.PromptString == "" {
 		cfg.PromptString = "rshell: "
+	} else if len(cfg.PromptString) > 20 {
+		log.Fatalf("Config PromptString illegal [%s] length > 20.", cfg.PromptString)
 	}
 	if cfg.Hostgroupsize == 0 {
 		cfg.Hostgroupsize = 200
+	} else if cfg.Hostgroupsize < 0 || cfg.Hostgroupsize > 1000 {
+		log.Fatalf("Config Hostgroupsize illegal [%d] not in (0, 1000].", cfg.Hostgroupsize)
 	}
 	return cfg
 }

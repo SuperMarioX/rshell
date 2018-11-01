@@ -45,7 +45,7 @@ ______     ______     __  __     ______     __         __
 \ \  __<   \ \___  \  \ \  __ \  \ \  __\   \ \ \____  \ \ \____
  \ \_\ \_\  \/\_____\  \ \_\ \_\  \ \_____\  \ \_____\  \ \_____\
   \/_/ /_/   \/_____/   \/_/\/_/   \/_____/   \/_____/   \/_____/
------- A Remote Shell Exec Application On Win&Linux Platform ----`)
+------ Rshell @2.5 Type "?" or "help" for more information. -----`)
 }
 
 func showInteractiveRunUsage() {
