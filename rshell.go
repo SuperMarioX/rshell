@@ -38,6 +38,16 @@ func main() {
 	}
 }
 
+func showIntro() {
+	fmt.Println(`
+______     ______     __  __     ______     __         __
+/\  == \   /\  ___\   /\ \_\ \   /\  ___\   /\ \       /\ \
+\ \  __<   \ \___  \  \ \  __ \  \ \  __\   \ \ \____  \ \ \____
+ \ \_\ \_\  \/\_____\  \ \_\ \_\  \ \_____\  \ \_____\  \ \_____\
+  \/_/ /_/   \/_____/   \/_/\/_/   \/_____/   \/_____/   \/_____/
+------ A Remote Shell Exec Application On Win&Linux Platform ----`)
+}
+
 func showInteractiveRunUsage() {
 	fmt.Println(`Usage: <keywords> <hostgroup> <agruments>
 
@@ -56,6 +66,7 @@ ctrl c
 }
 
 func interactiveRun() {
+	showIntro()
 	l, err := prompt.NewReadline(cfg, hostgroups)
 	if err != nil {
 		log.Fatal(err)
@@ -323,11 +334,11 @@ func run() error {
 		}
 
 		if cfg.Outputintime {
-			utils.OutputTaskHeader(task.Name)
+			utils.OutputTaskHeader(task.Name + "@" + task.Hostgroup)
 		}
 
 		for i := 0; i < len(hg.Hosts); i++ {
-			taskresult.Name = task.Name
+			taskresult.Name = task.Name + "@" + task.Hostgroup
 			select {
 			case res := <-taskchs:
 				taskresult.Results = append(taskresult.Results, res)

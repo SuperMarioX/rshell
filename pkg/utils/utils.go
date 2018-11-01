@@ -8,7 +8,7 @@ import (
 )
 
 func OutputTaskHeader(name string) {
-	color.Yellow("TASK [%-16s] *******************************************************\n", name)
+	color.Yellow("TASK [%-30s] *****************************************\n", name)
 }
 func OutputHostResult(result types.Hostresult) {
 	color.Green("HOST [%-16s] =======================================================\n", result.Hostaddr)
