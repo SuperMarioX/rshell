@@ -105,7 +105,7 @@ func parseHosts(hg Hostgroup) Hostgroup {
 
 func parseHostrange(hg Hostgroup) Hostgroup {
 	for _, hr := range hg.Hostranges {
-		if !checkers.IsIpv4(hr.From) || !checkers.IsIpv4(hr.To) {
+		if !checkers.IsIpv4(hr.From) || !checkers.IsIpv4(hr.To) || hr.From == hr.To {
 			log.Fatalf("IP Range illegal [%s/%s-%s].", hg.Groupname, hr.From, hr.To)
 		}
 		temp := []string{hr.From}
