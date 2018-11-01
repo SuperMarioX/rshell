@@ -3,25 +3,34 @@ package types
 //Default config
 
 type BlackCmd struct {
-	Cmd string `yaml:"cmd,omitempty"`
+	Cmd       string `yaml:"cmd,omitempty"`
 	CmdPrefix string `yaml:"cmdprefix,omitempty"`
 }
 
 type Cfg struct {
-	Concurrency  int      `yaml:"concurrency,omitempty"`
-	Tasktimeout  int      `yaml:"tasktimeout,omitempty"`
-	CmdSeparator string   `yaml:"cmdseparator,omitempty"`
+	Concurrency  int        `yaml:"concurrency,omitempty"`
+	Tasktimeout  int        `yaml:"tasktimeout,omitempty"`
+	CmdSeparator string     `yaml:"cmdseparator,omitempty"`
 	BlackCmdList []BlackCmd `yaml:"blackcmdlist,omitempty"`
-	PromptString string   `yaml:"promptstring,omitempty"`
-	Outputintime bool     `yaml:"outputintime,omitempty"`
+	PromptString string     `yaml:"promptstring,omitempty"`
+	Outputintime bool       `yaml:"outputintime,omitempty"`
+	Hostgroupsize int       `yaml:"hostgroupsize,omitempty"`
 }
 
 //Hosts config
+type Hostrange struct {
+	From string `yaml:"from,omitempty"`
+	To   string `yaml:"to,omitempty"`
+}
+
 type Hostgroup struct {
-	Groupname  string   `yaml:"groupname,omitempty"`
-	Authmethod string   `yaml:"authmethod,omitempty"`
-	Sshport    int      `yaml:"sshport,omitempty"`
-	Hosts      []string `yaml:"hosts,omitempty"`
+	Groupname  string      `yaml:"groupname,omitempty"`
+	Authmethod string      `yaml:"authmethod,omitempty"`
+	Sshport    int         `yaml:"sshport,omitempty"`
+	Hosts      []string    `yaml:"hosts,omitempty"`
+	Groups     []string    `yaml:"groups,omitempty"`
+	Hostranges []Hostrange `yaml:"hostranges,omitempty"`
+	Ips        []string
 }
 type Hostgroups struct {
 	Hgs []Hostgroup `yaml:"hostgroups,omitempty"`
@@ -44,7 +53,7 @@ type Auths struct {
 
 //Task config
 type Subtask struct {
-	Name    string 	 `yaml:"name,omitempty"`
+	Name    string   `yaml:"name,omitempty"`
 	Mode    string   `yaml:"mode,omitempty"`
 	Sudo    bool     `yaml:"sudo,omitempty"`
 	Cmds    []string `yaml:"cmds,omitempty"`
@@ -54,14 +63,14 @@ type Subtask struct {
 }
 
 type Task struct {
-	Name   string `yaml:"name,omitempty"`
-	Hostgroup string `yaml:"hostgroup,omitempty"`
-	Subtasks   []Subtask `yaml:"subtasks,omitempty"`
+	Name      string    `yaml:"name,omitempty"`
+	Hostgroup string    `yaml:"hostgroup,omitempty"`
+	Subtasks  []Subtask `yaml:"subtasks,omitempty"`
 }
 
 type Tasks struct {
-	Env    map[string]interface{} `yaml:"env,omitempty"`
-	Ts []Task `yaml:"tasks,omitempty"`
+	Env map[string]interface{} `yaml:"env,omitempty"`
+	Ts  []Task                 `yaml:"tasks,omitempty"`
 }
 
 //Result

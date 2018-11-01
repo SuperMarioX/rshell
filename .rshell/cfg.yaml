@@ -3,6 +3,7 @@ tasktimeout: 300        #The total timeout [second] of everyone goroutine
 cmdseparator: ";"       #The command separator
 promptstring: "rshell: " #The system prompt string
 outputintime: true      #The output in time, Default: true
+hostgroupsize: 200      #The max number of ip in hostgroup, Default: 200
 blackcmdlist:           #The dangerous black command list
 - cmd: rm /
   cmdprefix: rm /

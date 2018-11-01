@@ -17,3 +17,15 @@ hostgroups:
   sshport: 22
   hosts:
   - 192.168.31.63
+
+- groupname: test-group03
+  authmethod: alpha-env-root-pass
+  sshport: 22
+  groups:
+  - hostgroup02
+  - hostgroup03
+  hosts:
+  - 192.168.31.78
+  hostranges:
+  - from: 192.168.31.90
+    to: 192.168.31.92

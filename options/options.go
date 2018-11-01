@@ -3,6 +3,7 @@ package options
 import (
 	"flag"
 	"fmt"
+	"github.com/luckywinds/rshell/pkg/checkers"
 	. "github.com/luckywinds/rshell/types"
 	"gopkg.in/yaml.v2"
 	"html/template"
@@ -62,6 +63,9 @@ func GetCfg() Cfg {
 	if cfg.PromptString == "" {
 		cfg.PromptString = "rshell: "
 	}
+	if cfg.Hostgroupsize == 0 {
+		cfg.Hostgroupsize = 200
+	}
 	return cfg
 }
 
@@ -84,18 +88,108 @@ func initHostgroups() {
 		}
 	}
 }
+
+func incIp(s string) string {
+	ip := net.ParseIP(s)
+	for j := len(ip)-1; j>=0; j-- {
+		ip[j]++
+		if ip[j] > 0 {
+			break
+		}
+	}
+	return ip.String()
+}
+
+func parseHosts(hg Hostgroup) Hostgroup {
+	for _, h := range hg.Hosts {
+		if !checkers.IsIpv4(h) {
+			log.Fatalf("IP illegal [%s/%s].", hg.Groupname, h)
+		}
+	}
+	hg.Ips = append(hg.Ips, hg.Hosts...)
+	return hg
+}
+
+func parseHostrange(hg Hostgroup) Hostgroup {
+	for _, hr := range hg.Hostranges {
+		if !checkers.IsIpv4(hr.From) || !checkers.IsIpv4(hr.To) {
+			log.Fatalf("IP Range illegal [%s/%s-%s].", hg.Groupname, hr.From, hr.To)
+		}
+		temp := []string{hr.From}
+		found := false
+		nip := hr.From
+		count := 0
+		for {
+			count++
+			nip = incIp(nip)
+			if nip == hr.To {
+				found = true
+				temp = append(temp, nip)
+				break
+			}
+			if count > cfg.Hostgroupsize && !found {
+				log.Fatalf("Too Large Not Found. IP Range illegal [%s/%s-%s].", hg.Groupname, hr.From, hr.To)
+			}
+			temp = append(temp, nip)
+		}
+		if found {
+			hg.Ips = append(hg.Ips, temp...)
+		} else {
+			log.Fatalf("IP Range illegal [%s/%s-%s].", hg.Groupname, hr.From, hr.To)
+		}
+	}
+	return hg
+}
+
+func parseHostgroups(hgs Hostgroups) Hostgroups {
+	var tmphg = Hostgroups{}
+	for _, hg := range hgs.Hgs {
+		hg = parseHosts(hg)
+		hg = parseHostrange(hg)
+		tmphg.Hgs = append(tmphg.Hgs, hg)
+	}
+
+	var hgmap = make(map[string]Hostgroup)
+	for _, value := range tmphg.Hgs {
+		hgmap[value.Groupname] = value
+	}
+	if len(tmphg.Hgs) != len(hgmap) {
+		log.Fatal("There is duplicate hostgroup.")
+	}
+
+	var rethg = Hostgroups{}
+	for _, hg := range tmphg.Hgs {
+		for _, g := range hg.Groups {
+			if hgmap[g].Groupname == "" {
+				log.Fatalf("Not found. Groups illegal [%s/%s].", hg.Groupname, g)
+			}
+			hg.Ips = append(hg.Ips, hgmap[g].Ips...)
+		}
+		if checkers.IsDuplicate(hg.Ips) {
+			log.Fatalf("IP Duplicate. Hostgroup illegal [%s].", hg.Groupname)
+		}
+
+		if !checkers.CheckHostgroupSize(hg, cfg.Hostgroupsize) {
+			log.Fatalf("Too large. IP Range illegal [%s] > [%d].", hg.Groupname, cfg.Hostgroupsize)
+		}
+
+		rethg.Hgs = append(rethg.Hgs, hg)
+	}
+
+	return rethg
+}
+
 func GetHostgroups() (Hostgroups, map[string]Hostgroup) {
 	initHostgroups()
 	if len(hostgroups.Hgs) == 0 {
 		log.Fatal("The hostgroups empty.")
 	}
+	hostgroups = parseHostgroups(hostgroups)
 	var ret = make(map[string]Hostgroup)
 	for _, value := range hostgroups.Hgs {
 		ret[value.Groupname] = value
 	}
-	if len(hostgroups.Hgs) != len(ret) {
-		log.Fatal("There is duplicate hostgroup.")
-	}
+
 	return hostgroups, ret
 }
 

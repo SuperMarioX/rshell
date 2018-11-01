@@ -242,8 +242,8 @@ func run() error {
 		}
 		sudopass := auth.Sudopass
 
-		if len(hg.Hosts) == 0 {
-			return fmt.Errorf("%s", "Hosts empty.")
+		if len(hg.Ips) == 0 {
+			return fmt.Errorf("%s", "Hostgroup empty.")
 		}
 		if sshport < 0 {
 			return fmt.Errorf("%s", "SSH Port not right.")
@@ -261,11 +261,11 @@ func run() error {
 			return fmt.Errorf("%s", "SSH or SFTP Tasks empty.")
 		}
 
-		taskchs := make(chan Hostresult, len(hg.Hosts))
+		taskchs := make(chan Hostresult, len(hg.Ips))
 		defer close(taskchs)
 
 		var taskresult Taskresult
-		for _, host := range hg.Hosts {
+		for _, host := range hg.Ips {
 			limit <- true
 			go func(host string, sshport int, username, password, privatekey, passphrase, sudotype, sudopass string, cipers []string, task Task) {
 				var hostresult Hostresult
@@ -337,7 +337,7 @@ func run() error {
 			utils.OutputTaskHeader(task.Name + "@" + task.Hostgroup)
 		}
 
-		for i := 0; i < len(hg.Hosts); i++ {
+		for i := 0; i < len(hg.Ips); i++ {
 			taskresult.Name = task.Name + "@" + task.Hostgroup
 			select {
 			case res := <-taskchs:
@@ -357,7 +357,7 @@ func run() error {
 
 		var newtaskresult Taskresult
 		newtaskresult.Name = taskresult.Name
-		for _, h := range hg.Hosts {
+		for _, h := range hg.Ips {
 			if _, ok := m[h]; ok {
 				newtaskresult.Results = append(newtaskresult.Results, m[h])
 			} else {
