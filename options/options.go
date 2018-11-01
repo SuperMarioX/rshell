@@ -80,13 +80,6 @@ func initHostgroups() {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	for _, hg := range hostgroups.Hgs {
-		for _, h := range hg.Hosts {
-			if net.ParseIP(h) == nil {
-				log.Fatalf("IP illegal [%s/%s].", hg.Groupname, h)
-			}
-		}
-	}
 }
 
 func incIp(s string) string {
