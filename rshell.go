@@ -40,7 +40,7 @@ func main() {
 
 func showIntro() {
 	fmt.Println(`
-______     ______     __  __     ______     __         __
+ ______     ______     __  __     ______     __         __
 /\  == \   /\  ___\   /\ \_\ \   /\  ___\   /\ \       /\ \
 \ \  __<   \ \___  \  \ \  __ \  \ \  __\   \ \ \____  \ \ \____
  \ \_\ \_\  \/\_____\  \ \_\ \_\  \ \_____\  \ \_____\  \ \_____\
@@ -190,6 +190,8 @@ func interactiveRun() {
 			goto retry
 		case line == "":
 			goto retry
+		case line == "exit":
+			return
 		default:
 			showInteractiveRunUsage()
 			goto retry
