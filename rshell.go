@@ -5,6 +5,7 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/luckywinds/lwssh"
 	"github.com/luckywinds/rshell/options"
+	"github.com/luckywinds/rshell/pkg/crypt"
 	"github.com/luckywinds/rshell/pkg/filters"
 	"github.com/luckywinds/rshell/pkg/prompt"
 	"github.com/luckywinds/rshell/pkg/utils"
@@ -23,6 +24,7 @@ const (
 	UPLOAD      string = "upload"
 	SSH         string = "ssh"
 	SFTP        string = "sftp"
+	AES         string = "aes"
 )
 
 var cfg = options.GetCfg()
@@ -59,6 +61,8 @@ download hostgroup srcFile desDir
     --- Download srcFile from hostgroup to local desDir
 upload hostgroup srcFile desDir
     --- Upload srcFile from local to hostgroup desDir
+encrypt_aes cleartext_password
+    --- Encrypt cleartext_password with aes 256 cfb
 ctrl c
     --- Exit
 ?
@@ -192,6 +196,22 @@ func interactiveRun() {
 			goto retry
 		case line == "exit":
 			return
+		case strings.HasPrefix(line, "encrypt_aes "):
+			pass, err := utils.GetEncypt(line)
+			if err != nil {
+				fmt.Printf("Encypt failed. %v\n", err)
+			} else {
+				fmt.Println(crypt.AesEncrypt(pass, cfg))
+			}
+			goto retry
+		//case strings.HasPrefix(line, "decrypt_aes "):
+		//	pass, err := utils.GetEncypt(line)
+		//	if err != nil {
+		//		fmt.Printf("Decypt failed. %v\n", err)
+		//	} else {
+		//		fmt.Println(crypt.AesDecrypt(pass, cfg))
+		//	}
+		//	goto retry
 		default:
 			showInteractiveRunUsage()
 			goto retry
@@ -243,6 +263,22 @@ func run() error {
 			sudotype = "su"
 		}
 		sudopass := auth.Sudopass
+
+		if cfg.Passcrypttype == AES {
+			var perr error
+			password, perr = crypt.AesDecrypt(password, cfg)
+			if perr != nil {
+				return fmt.Errorf("%s/%s/%s", task.Hostgroup, auth.Name, "password format not right.")
+			}
+			passphrase, perr = crypt.AesDecrypt(passphrase, cfg)
+			if perr != nil {
+				return fmt.Errorf("%s/%s/%s", task.Hostgroup, auth.Name, "passphrase format not right.")
+			}
+			sudopass, perr = crypt.AesDecrypt(sudopass, cfg)
+			if perr != nil {
+				return fmt.Errorf("%s/%s/%s", task.Hostgroup, auth.Name, "sudopass format not right.")
+			}
+		}
 
 		if len(hg.Ips) == 0 {
 			return fmt.Errorf("%s", "Hostgroup empty.")

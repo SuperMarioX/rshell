@@ -8,13 +8,15 @@ type BlackCmd struct {
 }
 
 type Cfg struct {
-	Concurrency  int        `yaml:"concurrency,omitempty"`
-	Tasktimeout  int        `yaml:"tasktimeout,omitempty"`
-	CmdSeparator string     `yaml:"cmdseparator,omitempty"`
-	BlackCmdList []BlackCmd `yaml:"blackcmdlist,omitempty"`
-	PromptString string     `yaml:"promptstring,omitempty"`
-	Outputintime bool       `yaml:"outputintime,omitempty"`
-	Hostgroupsize int       `yaml:"hostgroupsize,omitempty"`
+	Concurrency   int        `yaml:"concurrency,omitempty"`
+	Tasktimeout   int        `yaml:"tasktimeout,omitempty"`
+	CmdSeparator  string     `yaml:"cmdseparator,omitempty"`
+	BlackCmdList  []BlackCmd `yaml:"blackcmdlist,omitempty"`
+	PromptString  string     `yaml:"promptstring,omitempty"`
+	Outputintime  bool       `yaml:"outputintime,omitempty"`
+	Hostgroupsize int        `yaml:"hostgroupsize,omitempty"`
+	Passcrypttype string     `yaml:"passcrypttype,omitempty"`
+	Passcryptkey  string     `yaml:"passcryptkey,omitempty"`
 }
 
 //Hosts config

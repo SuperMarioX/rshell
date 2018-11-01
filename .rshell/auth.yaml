@@ -3,15 +3,15 @@ authmethods:
   username: ttt
   privatekey: ""                    #First auth method option[privatekey], default: ""
   passphrase: ""                    #First auth method option[passphrase], default: ""
-  password: Huawei@123              #Second auth method option[password], default: ""
+  password: 56efc9c43425221af1ab2ce8d6d52a6d2926ff608d56be0601d6              #Second auth method option[password], default: ""
   sudotype: "su -"                  #Optional：Change root command if needed, default: "su"
-  sudopass: Cloud12#$               #Optional：root password if needed, default: ""
+  sudopass: b6c2e5ba01a5ba9b1b1eae53f839c4bf13d541da17829d8408               #Optional：root password if needed, default: ""
 
 - name: alpha-env-root-key
   username: root
   privatekey: "E:\\tmp\\id_rsa"
-  passphrase: "123456"
+  passphrase: 8f3844caf4e598719b0d9222504c9a335b7ad65eded7
 
 - name: alpha-env-root-pass
   username: root
-  password: Cloud12#$
+  password: b6c2e5ba01a5ba9b1b1eae53f839c4bf13d541da17829d8408

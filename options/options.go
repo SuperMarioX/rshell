@@ -76,6 +76,13 @@ func GetCfg() Cfg {
 	} else if cfg.Hostgroupsize < 0 || cfg.Hostgroupsize > 1000 {
 		log.Fatalf("Config Hostgroupsize illegal [%d] not in (0, 1000].", cfg.Hostgroupsize)
 	}
+	if cfg.Passcrypttype != "" {
+		if cfg.Passcrypttype != "aes" {
+			log.Fatalf("Config Passcrypttype illegal [%s] not in [aes].", cfg.Passcrypttype)
+		} else if len(cfg.Passcryptkey) != 32 {
+			log.Fatalf("Config Passcryptkey illegal [%s] length != 32.", cfg.Passcryptkey)
+		}
+	}
 	return cfg
 }
 

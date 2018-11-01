@@ -4,6 +4,8 @@ cmdseparator: ";"       #The command separator, Default: ";"
 promptstring: "rshell: " #The system prompt string, Default: "rshell: "
 outputintime: true      #The output in time, Default: false
 hostgroupsize: 200      #The max number of ip in hostgroup, Default: 200
+passcrypttype: "aes"    #The password crypt type, support [aes], Default: ""
+passcryptkey: "I`a!M@a#H$a%P^p&Y*c(R)y_P+t,K.eY"        #The aes crypt key, length must be 32. Not be empty if passcrypttype = aes.
 blackcmdlist:           #The dangerous black command list
 - cmd: rm /
   cmdprefix: rm /

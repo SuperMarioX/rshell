@@ -152,3 +152,11 @@ func GetUpload(hgm map[string]types.Hostgroup, line string) (upload, hostgroup, 
 	}
 	return upload, hostgroup, src, des, nil
 }
+
+func GetEncypt(line string) (pass string, err error) {
+	es := strings.SplitN(strings.TrimSpace(line), " ", 2)
+	if len(es) != 2 {
+		return "", fmt.Errorf("%s", "Encypt need arguments")
+	}
+	return strings.TrimSpace(es[1]), nil
+}
