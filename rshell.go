@@ -47,7 +47,7 @@ func showIntro() {
 \ \  __<   \ \___  \  \ \  __ \  \ \  __\   \ \ \____  \ \ \____
  \ \_\ \_\  \/\_____\  \ \_\ \_\  \ \_____\  \ \_____\  \ \_____\
   \/_/ /_/   \/_____/   \/_/\/_/   \/_____/   \/_____/   \/_____/
------- Rshell @2.6 Type "?" or "help" for more information. -----`)
+------ Rshell @3.0 Type "?" or "help" for more information. -----`)
 }
 
 func showInteractiveRunUsage() {
@@ -61,10 +61,14 @@ download hostgroup srcFile desDir
     --- Download srcFile from hostgroup to local desDir
 upload hostgroup srcFile desDir
     --- Upload srcFile from local to hostgroup desDir
+
 encrypt_aes cleartext_password
     --- Encrypt cleartext_password with aes 256 cfb
-ctrl c
-    --- Exit
+decrypt_aes ciphertext_password
+    --- Decrypt ciphertext_password with aes 256 cfb
+
+ctrl c or exit
+    --- Exit rshell
 ?
     --- Help`)
 }
@@ -101,14 +105,14 @@ func interactiveRun() {
 				goto retry
 			}
 			t := Task{
-				Name:   d,
+				Name:      d,
 				Hostgroup: h,
-				Subtasks:      []Subtask{
+				Subtasks: []Subtask{
 					{
-						Name:    "DEFAULT",
-						Mode:    SSH,
-						Sudo:    false,
-						Cmds:    strings.Split(c, cfg.CmdSeparator),
+						Name: "DEFAULT",
+						Mode: SSH,
+						Sudo: false,
+						Cmds: strings.Split(c, cfg.CmdSeparator),
 					},
 				},
 			}
@@ -126,14 +130,14 @@ func interactiveRun() {
 				goto retry
 			}
 			t := Task{
-				Name:   s,
+				Name:      s,
 				Hostgroup: h,
-				Subtasks:      []Subtask{
+				Subtasks: []Subtask{
 					{
-						Name:    "DEFAULT",
-						Mode:    SSH,
-						Sudo:    true,
-						Cmds:    strings.Split(c, cfg.CmdSeparator),
+						Name: "DEFAULT",
+						Mode: SSH,
+						Sudo: true,
+						Cmds: strings.Split(c, cfg.CmdSeparator),
 					},
 				},
 			}
@@ -151,9 +155,9 @@ func interactiveRun() {
 				goto retry
 			}
 			t := Task{
-				Name:   d,
+				Name:      d,
 				Hostgroup: h,
-				Subtasks:      []Subtask{
+				Subtasks: []Subtask{
 					{
 						Name:    "DEFAULT",
 						Mode:    SFTP,
@@ -174,9 +178,9 @@ func interactiveRun() {
 				goto retry
 			}
 			t := Task{
-				Name:   u,
+				Name:      u,
 				Hostgroup: h,
-				Subtasks:      []Subtask{
+				Subtasks: []Subtask{
 					{
 						Name:    "DEFAULT",
 						Mode:    SFTP,
@@ -201,17 +205,27 @@ func interactiveRun() {
 			if err != nil {
 				fmt.Printf("Encypt failed. %v\n", err)
 			} else {
-				fmt.Println(crypt.AesEncrypt(pass, cfg))
+				pp, err := crypt.AesEncrypt(pass, cfg)
+				if err != nil {
+					fmt.Printf("Encypt failed. %v\n", err)
+				} else {
+					fmt.Println(pp)
+				}
 			}
 			goto retry
-		//case strings.HasPrefix(line, "decrypt_aes "):
-		//	pass, err := utils.GetEncypt(line)
-		//	if err != nil {
-		//		fmt.Printf("Decypt failed. %v\n", err)
-		//	} else {
-		//		fmt.Println(crypt.AesDecrypt(pass, cfg))
-		//	}
-		//	goto retry
+		case strings.HasPrefix(line, "decrypt_aes "):
+			pass, err := utils.GetEncypt(line)
+			if err != nil {
+				fmt.Printf("Decypt failed. %v\n", err)
+			} else {
+				pp, err := crypt.AesDecrypt(pass, cfg)
+				if err != nil {
+					fmt.Printf("Decypt failed. %v\n", err)
+				} else {
+					fmt.Println(pp)
+				}
+			}
+			goto retry
 		default:
 			showInteractiveRunUsage()
 			goto retry
@@ -326,7 +340,7 @@ func run() error {
 								goto breakfor
 							}
 						}
-						if item.Cmds[len(item.Cmds) - 1] != "exit" && !strings.HasPrefix(item.Cmds[len(item.Cmds) - 1], "exit ") {
+						if item.Cmds[len(item.Cmds)-1] != "exit" && !strings.HasPrefix(item.Cmds[len(item.Cmds)-1], "exit ") {
 							item.Cmds = append(item.Cmds, "exit")
 						}
 						if item.Sudo {
@@ -364,7 +378,7 @@ func run() error {
 						hostresult.Error += "TASK Failed. Not support task mode[" + item.Mode + "], not in [ssh/sftp].\n"
 					}
 				}
-				breakfor:
+			breakfor:
 
 				taskchs <- hostresult
 				<-limit
