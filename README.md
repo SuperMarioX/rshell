@@ -57,8 +57,14 @@ download hostgroup srcFile desDir
     --- Download srcFile from hostgroup to local desDir
 upload hostgroup srcFile desDir
     --- Upload srcFile from local to hostgroup desDir
-ctrl c
-    --- Exit
+
+encrypt_aes cleartext_password
+    --- Encrypt cleartext_password with aes 256 cfb
+decrypt_aes ciphertext_password
+    --- Decrypt ciphertext_password with aes 256 cfb
+
+ctrl c or exit
+    --- Exit rshell
 ?
     --- Help
 ```
