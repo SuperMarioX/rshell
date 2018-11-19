@@ -92,7 +92,7 @@ func wordCompleter(line string, pos int) (head string, completions []string, tai
 				} else {
 					desfile := strings.SplitN(strings.TrimLeft(srcfile[1], " "), " ", 2)
 					if len(desfile) == 1 {
-						return keyword[0] + " " + hostgroup[0] + " ", desCompleter(desfile[0]), tail
+						return keyword[0] + " " + hostgroup[0] + " " + srcfile[0] + " ", desCompleter(desfile[0]), tail
 					}
 				}
 			}
