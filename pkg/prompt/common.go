@@ -42,13 +42,11 @@ func init() {
 	AddKeyword("download")
 	AddKeyword("encrypt_aes")
 	AddKeyword("decrypt_aes")
-	AddKeyword("exit")
-	AddKeyword("help")
 }
 
 var commonCmd = []string{
 	"date",
-	"free",
+	"ls",
 	"hostname",
 	"whoami",
 	"pwd",
