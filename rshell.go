@@ -45,7 +45,7 @@ func showIntro() {
 \ \  __<   \ \___  \  \ \  __ \  \ \  __\   \ \ \____  \ \ \____
  \ \_\ \_\  \/\_____\  \ \_\ \_\  \ \_____\  \ \_____\  \ \_____\
   \/_/ /_/   \/_____/   \/_/\/_/   \/_____/   \/_____/   \/_____/
------- Rshell @3.0 Type "?" or "help" for more information. -----`)
+------ Rshell @3.1 Type "?" or "help" for more information. -----`)
 }
 
 func showInteractiveRunUsage() {

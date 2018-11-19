@@ -5,11 +5,14 @@ import (
 	"github.com/peterh/liner"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
 func keywordCompleter(line string) (c []string) {
-	for _, value := range kset.List() {
+	l := kset.List()
+	sort.Strings(l)
+	for _, value := range l {
 		if strings.HasPrefix(value, line) {
 			c = append(c, value)
 		}
@@ -18,7 +21,9 @@ func keywordCompleter(line string) (c []string) {
 }
 
 func hostgroupCompleter(line string) (c []string) {
-	for _, value := range hset.List() {
+	l := hset.List()
+	sort.Strings(l)
+	for _, value := range l {
 		if strings.HasPrefix(value, line) {
 			c = append(c, value)
 		}
@@ -27,7 +32,9 @@ func hostgroupCompleter(line string) (c []string) {
 }
 
 func cmdCompleter(line string) (c []string) {
-	for _, value := range cset.List() {
+	l := cset.List()
+	sort.Strings(l)
+	for _, value := range l {
 		if strings.HasPrefix(value, line) {
 			c = append(c, value)
 		}
@@ -36,7 +43,9 @@ func cmdCompleter(line string) (c []string) {
 }
 
 func srcCompleter(line string) (c []string) {
-	for _, value := range sset.List() {
+	l := sset.List()
+	sort.Strings(l)
+	for _, value := range l {
 		if strings.HasPrefix(value, line) {
 			c = append(c, value)
 		}
@@ -45,7 +54,9 @@ func srcCompleter(line string) (c []string) {
 }
 
 func desCompleter(line string) (c []string) {
-	for _, value := range dset.List() {
+	l := dset.List()
+	sort.Strings(l)
+	for _, value := range l {
 		if strings.HasPrefix(value, line) {
 			c = append(c, value)
 		}
