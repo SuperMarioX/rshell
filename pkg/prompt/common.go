@@ -40,8 +40,6 @@ func init() {
 	AddKeyword("sudo")
 	AddKeyword("upload")
 	AddKeyword("download")
-	AddKeyword("encrypt_aes")
-	AddKeyword("decrypt_aes")
 }
 
 var commonCmd = []string{
