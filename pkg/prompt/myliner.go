@@ -13,7 +13,7 @@ func keywordCompleter(line string) (c []string) {
 	l := kset.List()
 	sort.Strings(l)
 	for _, value := range l {
-		if strings.HasPrefix(value, line) {
+		if strings.HasPrefix(value, strings.TrimLeft(line, " ")) {
 			c = append(c, value)
 		}
 	}
@@ -24,7 +24,7 @@ func hostgroupCompleter(line string) (c []string) {
 	l := hset.List()
 	sort.Strings(l)
 	for _, value := range l {
-		if strings.HasPrefix(value, line) {
+		if strings.HasPrefix(value, strings.TrimLeft(line, " ")) {
 			c = append(c, value)
 		}
 	}
@@ -35,7 +35,7 @@ func cmdCompleter(line string) (c []string) {
 	l := cset.List()
 	sort.Strings(l)
 	for _, value := range l {
-		if strings.HasPrefix(value, line) {
+		if strings.HasPrefix(value, strings.TrimLeft(line, " ")) {
 			c = append(c, value)
 		}
 	}
@@ -46,7 +46,7 @@ func srcCompleter(line string) (c []string) {
 	l := sset.List()
 	sort.Strings(l)
 	for _, value := range l {
-		if strings.HasPrefix(value, line) {
+		if strings.HasPrefix(value, strings.TrimLeft(line, " ")) {
 			c = append(c, value)
 		}
 	}
@@ -57,7 +57,7 @@ func desCompleter(line string) (c []string) {
 	l := dset.List()
 	sort.Strings(l)
 	for _, value := range l {
-		if strings.HasPrefix(value, line) {
+		if strings.HasPrefix(value, strings.TrimLeft(line, " ")) {
 			c = append(c, value)
 		}
 	}
