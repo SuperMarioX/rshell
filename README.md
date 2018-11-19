@@ -92,5 +92,6 @@ SYSERR =>
 - "gopkg.in/yaml.v2"
 - "github.com/fatih/color"
 - "github.com/scylladb/go-set/strset"
+- "github.com/peterh/liner"
 
 变更说明：

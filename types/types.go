@@ -17,6 +17,7 @@ type Cfg struct {
 	Hostgroupsize int        `yaml:"hostgroupsize,omitempty"`
 	Passcrypttype string     `yaml:"passcrypttype,omitempty"`
 	Passcryptkey  string     `yaml:"passcryptkey,omitempty"`
+	HistoryFile   string     `yaml:"historyfile,omitempty"`
 }
 
 //Hosts config

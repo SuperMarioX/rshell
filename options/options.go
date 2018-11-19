@@ -83,6 +83,11 @@ func GetCfg() Cfg {
 			log.Fatalf("Config Passcryptkey illegal [%s] length != 32.", cfg.Passcryptkey)
 		}
 	}
+	if cfg.HistoryFile == "" {
+		cfg.HistoryFile = ".rshell/rshell.history"
+	} else if len(cfg.HistoryFile) > 200 {
+		log.Fatalf("Config HistoryFile illegal [%s] length > 200.", cfg.HistoryFile)
+	}
 	return cfg
 }
 

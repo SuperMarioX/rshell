@@ -3,7 +3,6 @@ package prompt
 import (
 	"github.com/chzyer/readline"
 	"github.com/luckywinds/rshell/types"
-	"github.com/scylladb/go-set/strset"
 )
 
 func listHgs(h types.Hostgroups) func(string) []string {
@@ -16,37 +15,22 @@ func listHgs(h types.Hostgroups) func(string) []string {
 	}
 }
 
-var cset = strset.New()
-
 func listCmds() func(string) []string {
 	return func(string) []string {
 		return cset.List()
 	}
 }
-func AddCmd(cmd string) {
-	cset.Add(cmd + cfg.CmdSeparator)
-}
-
-var sset = strset.New()
 
 func listSrcs() func(string) []string {
 	return func(string) []string {
 		return sset.List()
 	}
 }
-func AddSrcFile(src string) {
-	sset.Add(src)
-}
-
-var dset = strset.New()
 
 func listDess() func(string) []string {
 	return func(string) []string {
 		return dset.List()
 	}
-}
-func AddDesDir(des string) {
-	dset.Add(des)
 }
 
 func newCompleter(hostgroups types.Hostgroups) *readline.PrefixCompleter {
@@ -81,16 +65,6 @@ func newCompleter(hostgroups types.Hostgroups) *readline.PrefixCompleter {
 		),
 	)
 }
-
-var commonCmd = []string{
-	"date",
-	"free",
-	"hostname",
-	"whoami",
-	"pwd",
-}
-
-var cfg types.Cfg
 
 func NewReadline(c types.Cfg, hostgroups types.Hostgroups) (*readline.Instance, error) {
 	cfg = c

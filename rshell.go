@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/chzyer/readline"
 	"github.com/luckywinds/lwssh"
 	"github.com/luckywinds/rshell/options"
 	"github.com/luckywinds/rshell/pkg/crypt"
@@ -10,7 +9,6 @@ import (
 	"github.com/luckywinds/rshell/pkg/prompt"
 	"github.com/luckywinds/rshell/pkg/utils"
 	. "github.com/luckywinds/rshell/types"
-	"io"
 	"log"
 	"path"
 	"strings"
@@ -67,7 +65,7 @@ encrypt_aes cleartext_password
 decrypt_aes ciphertext_password
     --- Decrypt ciphertext_password with aes 256 cfb
 
-ctrl c or exit
+exit
     --- Exit rshell
 ?
     --- Help`)
@@ -75,7 +73,7 @@ ctrl c or exit
 
 func interactiveRun() {
 	showIntro()
-	l, err := prompt.NewReadline(cfg, hostgroups)
+	l, err := prompt.New(cfg, hostgroups)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,14 +82,14 @@ func interactiveRun() {
 	for {
 	retry:
 		tasks = Tasks{}
-		line, err := l.Readline()
-		if err == readline.ErrInterrupt {
+		line, err := prompt.Prompt(l, cfg)
+		if err == prompt.ErrPromptAborted {
 			if len(line) == 0 {
 				break
 			} else {
 				continue
 			}
-		} else if err == io.EOF {
+		} else if err == prompt.ErrPromptError {
 			break
 		}
 
