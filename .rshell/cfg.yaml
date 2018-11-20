@@ -1,3 +1,4 @@
+updateserver: "http://git.huawei.com/x00212863/rshell/raw/master/releases"        #The auto update server address
 concurrency: 6          #The num of concurrency goroutine for hosts, Default: 6
 tasktimeout: 300        #The total timeout [second] of everyone goroutine, Default: 300
 cmdseparator: ";"       #The command separator, Default: ";"
@@ -6,7 +7,11 @@ outputintime: true      #The output in time, Default: false
 hostgroupsize: 200      #The max number of ip in hostgroup, Default: 200
 passcrypttype: "aes"    #The password crypt type, support [aes], Default: ""
 passcryptkey: "I`a!M@a#H$a%P^p&Y*c(R)y_P+t,K.eY"        #The aes crypt key, length must be 32. Not be empty if passcrypttype = aes.
-historyfile: ".rshell/rshell.history"                   #The operation history file
 blackcmdlist:           #The dangerous black command list
 - cmd: rm /
   cmdprefix: rm /
+mostusedcmds:           #The most used commands
+- pwd
+- date
+- whoami
+- ls

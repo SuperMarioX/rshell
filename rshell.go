@@ -7,6 +7,7 @@ import (
 	"github.com/luckywinds/rshell/pkg/crypt"
 	"github.com/luckywinds/rshell/pkg/filters"
 	"github.com/luckywinds/rshell/pkg/prompt"
+	"github.com/luckywinds/rshell/pkg/update"
 	"github.com/luckywinds/rshell/pkg/utils"
 	. "github.com/luckywinds/rshell/types"
 	"log"
@@ -29,8 +30,11 @@ var cfg = options.GetCfg()
 var auths, authsMap = options.GetAuths()
 var hostgroups, hostgroupsMap = options.GetHostgroups()
 var tasks, isScriptMode = options.GetTasks()
+var version = "3.2"
 
 func main() {
+	go update.Update(cfg, version)
+
 	if !isScriptMode {
 		interactiveRun()
 	} else {
@@ -45,7 +49,7 @@ func showIntro() {
 \ \  __<   \ \___  \  \ \  __ \  \ \  __\   \ \ \____  \ \ \____
  \ \_\ \_\  \/\_____\  \ \_\ \_\  \ \_____\  \ \_____\  \ \_____\
   \/_/ /_/   \/_____/   \/_/\/_/   \/_____/   \/_____/   \/_____/
------- Rshell @3.1 Type "?" or "help" for more information. -----`)
+------ Rshell @`+version+` Type "?" or "help" for more information. -----`)
 }
 
 func showInteractiveRunUsage() {

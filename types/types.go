@@ -18,6 +18,8 @@ type Cfg struct {
 	Passcrypttype string     `yaml:"passcrypttype,omitempty"`
 	Passcryptkey  string     `yaml:"passcryptkey,omitempty"`
 	HistoryFile   string     `yaml:"historyfile,omitempty"`
+	Mostusedcmds  []string   `yaml:"mostusedcmds,omitempty"`
+	Updateserver  string     `yaml:"updateserver,omitempty"`
 }
 
 //Hosts config
@@ -89,4 +91,10 @@ type Taskresult struct {
 }
 type Tasksresults struct {
 	Results []Taskresult `yaml:"results,omitempty"`
+}
+
+//Update
+type Latestversion struct {
+	Version string `yaml:"version,omitempty"`
+	Release string `yaml:"release,omitempty"`
 }

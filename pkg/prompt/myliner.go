@@ -107,7 +107,7 @@ func New(c types.Cfg, hostgroups types.Hostgroups) (*liner.State, error) {
 	for _, value := range hostgroups.Hgs {
 		hset.Add(value.Groupname)
 	}
-	for _, value := range commonCmd {
+	for _, value := range cfg.Mostusedcmds {
 		cset.Add(value + c.CmdSeparator)
 	}
 
