@@ -15,5 +15,4 @@ mostusedcmds:           #The most used commands
 - whoami
 - ls
 updateserver:           #The auto update server address
-- http://git.huawei.com/x00212863/rshell/raw/master/releases
-- http://gitlabsec.huawei.com/x00212863/rshell/raw/master/releases
+- https://github.com/luckywinds/rshell/raw/master/releases
