@@ -15,6 +15,12 @@
 - 定制化，支持提示符、分隔符、超时等定制
 - 模板化，文件编排支持变量自定义
 
+## 应用安装
+
+```
+go get github.com/luckywinds/rshell
+```
+
 ## 应用构建
 
 ```
@@ -34,7 +40,7 @@ go build rshell.go
 ## 文件执行模式
 
 ```
-rshell.exe -f examples/test.yaml
+rshell -f examples/test.yaml
 ```
 
 注：examples存放示例文件test.yaml，使用说明见文件注释说明
@@ -42,7 +48,7 @@ rshell.exe -f examples/test.yaml
 ## 交互式命令行执行模式
 
 ```
-rshell.exe
+rshell
 ```
 
 使用说明：
@@ -63,7 +69,7 @@ encrypt_aes cleartext_password
 decrypt_aes ciphertext_password
     --- Decrypt ciphertext_password with aes 256 cfb
 
-ctrl c or exit
+exit
     --- Exit rshell
 ?
     --- Help
