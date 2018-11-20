@@ -1,4 +1,3 @@
-updateserver: "http://git.huawei.com/x00212863/rshell/raw/master/releases"        #The auto update server address
 concurrency: 6          #The num of concurrency goroutine for hosts, Default: 6
 tasktimeout: 300        #The total timeout [second] of everyone goroutine, Default: 300
 cmdseparator: ";"       #The command separator, Default: ";"
@@ -15,3 +14,6 @@ mostusedcmds:           #The most used commands
 - date
 - whoami
 - ls
+updateserver:           #The auto update server address
+- http://git.huawei.com/x00212863/rshell/raw/master/releases
+- http://gitlabsec.huawei.com/x00212863/rshell/raw/master/releases

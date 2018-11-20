@@ -30,7 +30,7 @@ var cfg = options.GetCfg()
 var auths, authsMap = options.GetAuths()
 var hostgroups, hostgroupsMap = options.GetHostgroups()
 var tasks, isScriptMode = options.GetTasks()
-var version = "3.2"
+var version = "3.3"
 
 func main() {
 	go update.Update(cfg, version)

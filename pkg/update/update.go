@@ -51,14 +51,21 @@ func downloadFile(outpath string, file string, url string) error {
 }
 
 func Update(c types.Cfg, cVersion string) {
-	if c.Updateserver == "" {
+	if len(c.Updateserver) == 0 {
 		return
 	}
 
-	downloadFile(fileroot, filename, c.Updateserver)
-	getLatestVersion()
+	var server = ""
+	for _, s := range c.Updateserver {
+		downloadFile(fileroot, filename, s)
+		getLatestVersion()
+		if version.Version != "" && version.Release != "" {
+			server = s
+			break
+		}
+	}
 
-	if isNeedUpdate(cVersion) < 0 && version.Release != "" {
-		downloadFile(".", version.Release, c.Updateserver)
+	if server != "" && isNeedUpdate(cVersion) < 0 {
+		downloadFile(".", version.Release, server)
 	}
 }

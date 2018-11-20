@@ -19,7 +19,7 @@ type Cfg struct {
 	Passcryptkey  string     `yaml:"passcryptkey,omitempty"`
 	HistoryFile   string     `yaml:"historyfile,omitempty"`
 	Mostusedcmds  []string   `yaml:"mostusedcmds,omitempty"`
-	Updateserver  string     `yaml:"updateserver,omitempty"`
+	Updateserver  []string     `yaml:"updateserver,omitempty"`
 }
 
 //Hosts config
