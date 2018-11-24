@@ -46,7 +46,7 @@ func initCfg() {
 	}
 	err = yaml.Unmarshal(c, &cfg)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", *cfgFile, err)
 	}
 }
 func GetCfg() Cfg {
@@ -100,7 +100,7 @@ func initHostgroups() {
 	}
 	err = yaml.Unmarshal(h, &hostgroups)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", *hostsFile, err)
 	}
 }
 
@@ -217,7 +217,7 @@ func initAuths() {
 	}
 	err = yaml.Unmarshal(a, &auths)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", *authFile, err)
 	}
 }
 func GetAuths() (Auths, map[string]Auth) {
@@ -245,7 +245,21 @@ func initTasks(scriptFile string) {
 
 	err = yaml.Unmarshal(p, &tasks)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", scriptFile, err)
+	}
+}
+
+var env Env
+
+func initEnv(scriptFile string) {
+	p, err := ioutil.ReadFile(scriptFile)
+	if err != nil {
+		log.Fatalf("Can not find script file[%s].", scriptFile)
+	}
+
+	err = yaml.Unmarshal(p, &env)
+	if err != nil {
+		log.Fatalf("YAML[%s] Unmarshal error: %v", scriptFile, err)
 	}
 }
 
@@ -263,21 +277,24 @@ func templateScript(script string) {
 	}
 	defer f.Close()
 
-	if err := t.Execute(f, tasks.Env); err != nil {
+	if err := t.Execute(f, env.Env); err != nil {
 		log.Fatal("Parser template script file task failed.")
 	}
 }
 
 func GetTasks() (Tasks, bool) {
 	if *script != "" {
-		initTasks(*script)
+		initEnv(*script)
+		if len(env.Env) != 0 {
+			templateScript(*script)
+			initTasks(tempScript)
+		} else {
+			initTasks(*script)
+		}
 		if len(tasks.Ts) == 0 {
 			log.Fatal("The tasks empty.")
 		}
-		if len(tasks.Env) != 0 {
-			templateScript(*script)
-			initTasks(tempScript)
-		}
+
 		return tasks, true
 	} else {
 		return tasks, false
