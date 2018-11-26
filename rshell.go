@@ -372,7 +372,7 @@ func run() error {
 							if err == nil {
 								hostresult.Stdout += "DOWNLOAD Success [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "]\n\n"
 							} else {
-								hostresult.Error += "Finish Now @ DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] @ " + err.Error() + "\n\n"
+								hostresult.Error += "Finish Now @ DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] " + err.Error()
 								break
 							}
 						} else if item.FtpType == UPLOAD {
@@ -380,7 +380,7 @@ func run() error {
 							if err == nil {
 								hostresult.Stdout += "UPLOAD Success [" + item.SrcFile + " -> " + item.DesDir + "]\n\n"
 							} else {
-								hostresult.Error += "Finish Now @ UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] @ " + err.Error() + "\n\n"
+								hostresult.Error += "Finish Now @ UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] " + err.Error()
 								break
 							}
 						} else {
