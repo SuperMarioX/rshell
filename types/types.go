@@ -77,10 +77,6 @@ type Tasks struct {
 	Ts  []Task                 `yaml:"tasks,omitempty"`
 }
 
-type Env struct {
-	Env map[string]interface{} `yaml:"env,omitempty"`
-}
-
 //Result
 type Hostresult struct {
 	Hostaddr string `yaml:"hostaddr,omitempty"`

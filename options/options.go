@@ -19,6 +19,7 @@ var (
 	hostsFile = flag.String("hosts", path.Join(".rshell", "hosts.yaml"), "Hosts Config file to read, Default: "+path.Join(".rshell", "hosts.yaml"))
 	authFile  = flag.String("auth", path.Join(".rshell", "auth.yaml"), "Auth Config file to read, Default: "+path.Join(".rshell", "hosts.yaml"))
 	script    = flag.String("f", "", "The script yaml.")
+	scriptValues   = flag.String("v", "", "The script values yaml.")
 )
 
 func init() {
@@ -249,17 +250,20 @@ func initTasks(scriptFile string) {
 	}
 }
 
-var env Env
+var values map[string]interface{}
 
-func initEnv(scriptFile string) {
-	p, err := ioutil.ReadFile(scriptFile)
+func initValues(scriptValues string) {
+	if scriptValues == "" {
+		return
+	}
+	p, err := ioutil.ReadFile(scriptValues)
 	if err != nil {
-		log.Fatalf("Can not find script file[%s].", scriptFile)
+		log.Fatalf("Can not find script file[%s].", scriptValues)
 	}
 
-	err = yaml.Unmarshal(p, &env)
+	err = yaml.Unmarshal(p, &values)
 	if err != nil {
-		log.Fatalf("YAML[%s] Unmarshal error: %v", scriptFile, err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", scriptValues, err)
 	}
 }
 
@@ -277,15 +281,15 @@ func templateScript(script string) {
 	}
 	defer f.Close()
 
-	if err := t.Execute(f, env.Env); err != nil {
+	if err := t.Execute(f, values); err != nil {
 		log.Fatal("Parser template script file task failed.")
 	}
 }
 
 func GetTasks() (Tasks, bool) {
 	if *script != "" {
-		initEnv(*script)
-		if len(env.Env) != 0 {
+		initValues(*scriptValues)
+		if len(values) != 0 {
 			templateScript(*script)
 			initTasks(tempScript)
 		} else {

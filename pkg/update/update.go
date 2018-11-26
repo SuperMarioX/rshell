@@ -65,7 +65,7 @@ func Update(c types.Cfg, cVersion string) {
 		}
 	}
 
-	if server != "" && isNeedUpdate(cVersion) < 0 {
+	if server != "" && isNeedUpdate(cVersion) != 0 {
 		downloadFile(".", version.Release, server)
 	}
 }
