@@ -40,7 +40,7 @@ go build rshell.go
 ## 文件执行模式
 
 ```
-rshell -f examples/test.yaml
+rshell -f examples/test.yaml -v examples/values.yaml
 ```
 
 注：examples存放示例文件test.yaml，使用说明见文件注释说明
