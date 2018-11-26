@@ -354,7 +354,14 @@ func run() error {
 							hostresult.Error = err.Error()
 						}
 						hostresult.Stdout += stdout
-						hostresult.Stderr += stderr
+						if stderr != "" {
+							if isScriptMode {
+								hostresult.Stdout += "\n"
+								hostresult.Stdout += "COMMANDS Failed. @ " + stderr + "\n"
+							} else {
+								hostresult.Stderr += stderr
+							}
+						}
 					} else if item.Mode == SFTP {
 						if isScriptMode {
 							hostresult.Stdout += fmt.Sprintf("FTP  [%-16s] -------------------------------------------------------\n", item.Name)
@@ -362,16 +369,16 @@ func run() error {
 						if item.FtpType == DOWNLOAD {
 							err = lwssh.ScpDownload(host, sshport, username, password, privatekey, passphrase, ciphers, item.SrcFile, path.Join(item.DesDir, hg.Groupname))
 							if err == nil {
-								hostresult.Stdout += "DOWNLOAD Success [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "]\n"
+								hostresult.Stdout += "DOWNLOAD Success [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "]\n\n"
 							} else {
-								hostresult.Stdout += "DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] " + err.Error() + "\n"
+								hostresult.Stdout += "DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] @ " + err.Error() + "\n\n"
 							}
 						} else if item.FtpType == UPLOAD {
 							err = lwssh.ScpUpload(host, sshport, username, password, privatekey, passphrase, ciphers, item.SrcFile, item.DesDir)
 							if err == nil {
-								hostresult.Stdout += "UPLOAD Success [" + item.SrcFile + " -> " + item.DesDir + "]\n"
+								hostresult.Stdout += "UPLOAD Success [" + item.SrcFile + " -> " + item.DesDir + "]\n\n"
 							} else {
-								hostresult.Stdout += "UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] " + err.Error() + "\n"
+								hostresult.Stdout += "UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] @ " + err.Error() + "\n\n"
 							}
 						} else {
 							hostresult.Error += "SFTP Failed. Not support ftp type[" + item.FtpType + "], not in [download/upload].\n"
