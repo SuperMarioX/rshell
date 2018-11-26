@@ -364,14 +364,14 @@ func run() error {
 							if err == nil {
 								hostresult.Stdout += "DOWNLOAD Success [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "]\n"
 							} else {
-								hostresult.Error += "DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] " + err.Error() + "\n"
+								hostresult.Stdout += "DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] " + err.Error() + "\n"
 							}
 						} else if item.FtpType == UPLOAD {
 							err = lwssh.ScpUpload(host, sshport, username, password, privatekey, passphrase, ciphers, item.SrcFile, item.DesDir)
 							if err == nil {
 								hostresult.Stdout += "UPLOAD Success [" + item.SrcFile + " -> " + item.DesDir + "]\n"
 							} else {
-								hostresult.Error += "UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] " + err.Error() + "\n"
+								hostresult.Stdout += "UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] " + err.Error() + "\n"
 							}
 						} else {
 							hostresult.Error += "SFTP Failed. Not support ftp type[" + item.FtpType + "], not in [download/upload].\n"
