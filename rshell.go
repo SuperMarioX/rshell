@@ -360,7 +360,7 @@ func run() error {
 							}
 						}
 						if err != nil {
-							hostresult.Error += "Finish Now @ " + err.Error() + ""
+							hostresult.Error += "Finish Now @ " + err.Error()
 							break
 						}
 					} else if item.Mode == SFTP {
