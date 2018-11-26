@@ -350,17 +350,18 @@ func run() error {
 							item.Cmds = append(item.Cmds, "exit")
 						}
 						stdout, stderr, err = lwssh.SSHShell(host, sshport, username, password, privatekey, passphrase, ciphers, item.Cmds)
-						if err != nil {
-							hostresult.Error = err.Error()
-						}
 						hostresult.Stdout += stdout
 						if stderr != "" {
 							if isScriptMode {
 								hostresult.Stdout += "\n"
-								hostresult.Stdout += "COMMANDS Failed. @ " + stderr + "\n"
+								hostresult.Stdout += "WARN : COMMANDS Return @ " + stderr + "\n"
 							} else {
 								hostresult.Stderr += stderr
 							}
+						}
+						if err != nil {
+							hostresult.Error += "Finish Now @ " + err.Error() + ""
+							break
 						}
 					} else if item.Mode == SFTP {
 						if isScriptMode {
@@ -371,20 +372,24 @@ func run() error {
 							if err == nil {
 								hostresult.Stdout += "DOWNLOAD Success [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "]\n\n"
 							} else {
-								hostresult.Stdout += "DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] @ " + err.Error() + "\n\n"
+								hostresult.Error += "Finish Now @ DOWNLOAD Failed [" + item.SrcFile + " -> " + path.Join(item.DesDir, hg.Groupname) + "] @ " + err.Error() + "\n\n"
+								break
 							}
 						} else if item.FtpType == UPLOAD {
 							err = lwssh.ScpUpload(host, sshport, username, password, privatekey, passphrase, ciphers, item.SrcFile, item.DesDir)
 							if err == nil {
 								hostresult.Stdout += "UPLOAD Success [" + item.SrcFile + " -> " + item.DesDir + "]\n\n"
 							} else {
-								hostresult.Stdout += "UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] @ " + err.Error() + "\n\n"
+								hostresult.Error += "Finish Now @ UPLOAD Failed [" + item.SrcFile + " -> " + item.DesDir + "] @ " + err.Error() + "\n\n"
+								break
 							}
 						} else {
-							hostresult.Error += "SFTP Failed. Not support ftp type[" + item.FtpType + "], not in [download/upload].\n"
+							hostresult.Error += "Finish Now @ SFTP Failed. Not support ftp type[" + item.FtpType + "], not in [download/upload].\n"
+							break
 						}
 					} else {
-						hostresult.Error += "TASK Failed. Not support task mode[" + item.Mode + "], not in [ssh/sftp].\n"
+						hostresult.Error += "Finish Now @ TASK Failed. Not support task mode[" + item.Mode + "], not in [ssh/sftp].\n"
+						break
 					}
 				}
 			breakfor:
