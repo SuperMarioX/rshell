@@ -20,6 +20,9 @@ func AddHostgroup(hostgroup string) {
 var cset = strset.New()
 
 func AddCmd(cmd string) {
+	if cmd == "" {
+		return
+	}
 	cset.Add(cmd + cfg.CmdSeparator)
 }
 
