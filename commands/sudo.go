@@ -23,22 +23,22 @@ func SUDO(actionname, groupname string, cmds []string) error {
 
 	for _, c := range cmds {
 		if filters.IsBlackCmd(c, cfg.BlackCmdList) {
-			return fmt.Errorf("DANGER: [%s] is in black command list.", c)
+			return fmt.Errorf("DANGER: [%s] in black command list.", c)
 		}
 	}
 
 	if cfg.Passcrypttype != "" {
 		au.Password, err = getPlainPass(au.Password, cfg)
 		if err != nil {
-			return err
+			return fmt.Errorf("get plain password error [%v] crypt type is [%s]", err, cfg.Passcrypttype)
 		}
 		au.Passphrase, err = getPlainPass(au.Passphrase, cfg)
 		if err != nil {
-			return err
+			return fmt.Errorf("get plain password error [%v] crypt type is [%s]", err, cfg.Passcrypttype)
 		}
 		au.Sudopass, err = getPlainPass(au.Sudopass, cfg)
 		if err != nil {
-			return err
+			return fmt.Errorf("get plain password error [%v] crypt type is [%s]", err, cfg.Passcrypttype)
 		}
 	}
 
@@ -57,7 +57,7 @@ func SUDO(actionname, groupname string, cmds []string) error {
 			result.Actionname = actionname
 			result.Actiontype = "sudo"
 			result.Groupname = groupname
-			result.Hostaddr = ip
+			result.Hostaddr = host
 			result.Stdout = stdout
 			result.Stderr = stderr
 			if err != nil {

@@ -183,30 +183,31 @@ func scriptRun() {
 		}
 
 		for _, stask := range task.Subtasks {
+			name := task.Name + "/" + stask.Name
 			if stask.Mode == SSH {
 				if stask.Sudo {
-					if err := commands.SUDO(task.Name, task.Hostgroup, stask.Cmds); err != nil {
-						log.Fatalf("ERROR: %s/%s/%s/%v", task.Name, task.Hostgroup, SUDO, err)
+					if err := commands.SUDO(name, task.Hostgroup, stask.Cmds); err != nil {
+						log.Fatalf("ERROR: %s/%s/%s/%v", name, task.Hostgroup, SUDO, err)
 					}
 				} else {
-					if err := commands.DO(task.Name, task.Hostgroup, stask.Cmds); err != nil {
-						log.Fatalf("ERROR: %s/%s/%s/%v", task.Name, task.Hostgroup, DO, err)
+					if err := commands.DO(name, task.Hostgroup, stask.Cmds); err != nil {
+						log.Fatalf("ERROR: %s/%s/%s/%v", name, task.Hostgroup, DO, err)
 					}
 				}
 			} else if stask.Mode == SFTP {
 				if stask.FtpType == DOWNLOAD {
-					if err := commands.Download(task.Name, task.Hostgroup, stask.SrcFile, stask.DesDir); err != nil {
-						log.Fatalf("ERROR: %s/%s/%s/%v", task.Name, task.Hostgroup, DOWNLOAD, err)
+					if err := commands.Download(name, task.Hostgroup, stask.SrcFile, stask.DesDir); err != nil {
+						log.Fatalf("ERROR: %s/%s/%s/%v", name, task.Hostgroup, DOWNLOAD, err)
 					}
 				} else if stask.FtpType == UPLOAD {
-					if err := commands.Upload(task.Name, task.Hostgroup, stask.SrcFile, stask.DesDir); err != nil {
-						log.Fatalf("ERROR: %s/%s/%s/%v", task.Name, task.Hostgroup, UPLOAD, err)
+					if err := commands.Upload(name, task.Hostgroup, stask.SrcFile, stask.DesDir); err != nil {
+						log.Fatalf("ERROR: %s/%s/%s/%v", name, task.Hostgroup, UPLOAD, err)
 					}
 				} else {
-					log.Fatalf("ERROR: %s/%s/%s/%s", task.Name, task.Hostgroup, stask.FtpType, "Not support")
+					log.Fatalf("ERROR: %s/%s/%s/%s", name, task.Hostgroup, stask.FtpType, "Not support")
 				}
 			} else {
-				log.Fatalf("ERROR: %s/%s/%s/%s", task.Name, task.Hostgroup, stask.Mode, "Not support")
+				log.Fatalf("ERROR: %s/%s/%s/%s", name, task.Hostgroup, stask.Mode, "Not support")
 			}
 		}
 	}

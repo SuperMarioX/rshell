@@ -23,7 +23,7 @@ func simpleOutput(result chan types.Hostresult, hg types.Hostgroup) {
 			if cfg.Outputintime == true {
 				taskresult.Name = res.Actionname
 				if !header {
-					color.Yellow("TASK [%-30s] *****************************************\n", taskresult.Name + "@" + hg.Groupname)
+					color.Yellow("TASK [%-50s] *********************\n", taskresult.Name + "@" + hg.Groupname)
 					header = true
 				}
 				outFactory(cfg.Outputtype, res).PrintSimple()
@@ -34,7 +34,7 @@ func simpleOutput(result chan types.Hostresult, hg types.Hostgroup) {
 	}
 
 	if cfg.Outputintime == false {
-		color.Yellow("TASK [%-30s] *****************************************\n", taskresult.Name + "@" + hg.Groupname)
+		color.Yellow("TASK [%-50s] *********************\n", taskresult.Name + "@" + hg.Groupname)
 		for _, value := range taskresult.Results {
 			outFactory(cfg.Outputtype, value).PrintSimple()
 		}

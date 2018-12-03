@@ -7,6 +7,7 @@ import (
 	"github.com/luckywinds/rshell/outputs"
 	"github.com/luckywinds/rshell/types"
 	"path"
+	"strings"
 )
 
 func Download(actionname, groupname string, srcFilePath, desDirPath string) error {
@@ -24,15 +25,15 @@ func Download(actionname, groupname string, srcFilePath, desDirPath string) erro
 	if cfg.Passcrypttype != "" {
 		au.Password, err = getPlainPass(au.Password, cfg)
 		if err != nil {
-			return err
+			return fmt.Errorf("get plain password error [%v] crypt type is [%s]", err, cfg.Passcrypttype)
 		}
 		au.Passphrase, err = getPlainPass(au.Passphrase, cfg)
 		if err != nil {
-			return err
+			return fmt.Errorf("get plain password error [%v] crypt type is [%s]", err, cfg.Passcrypttype)
 		}
 		au.Sudopass, err = getPlainPass(au.Sudopass, cfg)
 		if err != nil {
-			return err
+			return fmt.Errorf("get plain password error [%v] crypt type is [%s]", err, cfg.Passcrypttype)
 		}
 	}
 
@@ -46,12 +47,15 @@ func Download(actionname, groupname string, srcFilePath, desDirPath string) erro
 		limit <- true
 		go func(groupname, host string, port int, user, pass, keyname, passphrase string, timeout int, ciphers []string, srcFilePath, desDirPath string) {
 			//fmt.Printf("%v %v %v %v %v %v %v %v %v %v\n", groupname, host, port, user, pass, keyname, passphrase, timeout, ciphers, cmds)
+			if !strings.HasSuffix(desDirPath, "/") {
+				desDirPath = desDirPath + "/"
+			}
 			err := sftp.Download(groupname, host, port, user, pass, keyname, passphrase, timeout, ciphers, srcFilePath, desDirPath)
 			var result types.Hostresult
 			result.Actionname = actionname
 			result.Actiontype = "download"
 			result.Groupname = groupname
-			result.Hostaddr = ip
+			result.Hostaddr = host
 			if err == nil {
 				result.Stdout = "DOWNLOAD Success [" + srcFilePath + " -> " + path.Join(desDirPath, hg.Groupname) + "]"
 			} else {

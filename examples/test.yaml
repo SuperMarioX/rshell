@@ -16,7 +16,6 @@ tasks:
     cmds:
     - whoami
     - date
-    - rm /abc
 
   - name: test upload
     mode: sftp
@@ -34,4 +33,3 @@ tasks:
     ftptype: download
     srcfile: test.yaml
     desdir: . 
-
