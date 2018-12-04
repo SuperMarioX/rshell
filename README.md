@@ -29,5 +29,5 @@ go build rshell.go
 
 ## 使用文档
 
-- [详细配置说明](docs/config.md)
-- [详细使用说明](docs/usage.md)
+- [配置说明](docs/config.md)
+- [使用说明](docs/usage.md)
