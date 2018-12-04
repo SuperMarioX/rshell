@@ -33,15 +33,16 @@ func simpleOutput(result chan types.Hostresult, hg types.Hostgroup) {
 		}
 	}
 
+	if len(taskresult.Results) == 0 {
+		color.Red("%s\n", "ALL HOSTS TIMEOUT!!!")
+		return
+	}
+
 	if !cfg.Outputintime {
-		color.Yellow("TASK [%-50s] *********************\n", taskresult.Name + "@" + hg.Groupname)
+		color.Yellow("TASK [%-50s] *********************\n", taskresult.Results[0].Actionname + "@" + hg.Groupname)
 		for _, value := range taskresult.Results {
 			outFactory(cfg.Outputtype, value).PrintSimple()
 		}
-	}
-
-	if len(taskresult.Results) == 0 {
-		color.Red("%s\n", "ALL HOSTS TIMEOUT!!!")
 	}
 
 	if len(taskresult.Results) != len(hg.Ips) {
