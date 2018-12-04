@@ -20,7 +20,7 @@ func simpleOutput(result chan types.Hostresult, hg types.Hostgroup) {
 		select {
 		case res := <-result:
 			taskresult.Results = append(taskresult.Results, res)
-			if cfg.Outputintime == true {
+			if cfg.Outputintime {
 				taskresult.Name = res.Actionname
 				if !header {
 					color.Yellow("TASK [%-50s] *********************\n", taskresult.Name + "@" + hg.Groupname)
@@ -33,7 +33,7 @@ func simpleOutput(result chan types.Hostresult, hg types.Hostgroup) {
 		}
 	}
 
-	if cfg.Outputintime == false {
+	if !cfg.Outputintime {
 		color.Yellow("TASK [%-50s] *********************\n", taskresult.Name + "@" + hg.Groupname)
 		for _, value := range taskresult.Results {
 			outFactory(cfg.Outputtype, value).PrintSimple()
@@ -51,7 +51,7 @@ func simpleOutput(result chan types.Hostresult, hg types.Hostgroup) {
 		}
 
 		for _, h := range hg.Ips {
-			if _, ok := m[h]; !ok {
+			if v, ok := m[h]; !ok {
 				outFactory(cfg.Outputtype, types.Hostresult{
 					Actionname: taskresult.Results[0].Actionname,
 					Actiontype: taskresult.Results[0].Actiontype,
@@ -61,6 +61,8 @@ func simpleOutput(result chan types.Hostresult, hg types.Hostgroup) {
 					Stdout:     "",
 					Stderr:     "",
 				}).PrintSimple()
+			} else if !cfg.Outputintime {
+				outFactory(cfg.Outputtype, v).PrintSimple()
 			}
 		}
 	}

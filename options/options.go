@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	cfgFile   = flag.String("cfg", path.Join(".rshell", "cfg.yaml"), "System Config file to read, Default: "+path.Join(".rshell", "cfg.yaml"))
-	hostsFile = flag.String("hosts", path.Join(".rshell", "hosts.yaml"), "Hosts Config file to read, Default: "+path.Join(".rshell", "hosts.yaml"))
-	authFile  = flag.String("auth", path.Join(".rshell", "auth.yaml"), "Auth Config file to read, Default: "+path.Join(".rshell", "hosts.yaml"))
+	cfgFile   = path.Join(".rshell", "cfg.yaml")
+	hostsFile = path.Join(".rshell", "hosts.yaml")
+	authFile  = path.Join(".rshell", "auth.yaml")
 	script    = flag.String("f", "", "The script yaml.")
 	scriptValues   = flag.String("v", "", "The script values yaml.")
 )
@@ -45,13 +45,13 @@ Options:`)
 var cfg Cfg
 
 func initCfg() {
-	c, err := ioutil.ReadFile(*cfgFile)
+	c, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
-		log.Fatalf("Can not find cfg file[%s].", *cfgFile)
+		log.Fatalf("Can not find cfg file[%s].", cfgFile)
 	}
 	err = yaml.Unmarshal(c, &cfg)
 	if err != nil {
-		log.Fatalf("YAML[%s] Unmarshal error: %v", *cfgFile, err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", cfgFile, err)
 	}
 }
 func GetCfg() Cfg {
@@ -104,13 +104,13 @@ var hostgroups Hostgroups
 var hostgroupsm = make(map[string]Hostgroup)
 
 func initHostgroups() {
-	h, err := ioutil.ReadFile(*hostsFile)
+	h, err := ioutil.ReadFile(hostsFile)
 	if err != nil {
-		log.Fatalf("Can not find hosts file[%s].", *hostsFile)
+		log.Fatalf("Can not find hosts file[%s].", hostsFile)
 	}
 	err = yaml.Unmarshal(h, &hostgroups)
 	if err != nil {
-		log.Fatalf("YAML[%s] Unmarshal error: %v", *hostsFile, err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", hostsFile, err)
 	}
 }
 
@@ -234,13 +234,13 @@ var auths Auths
 var authsm = make(map[string]Auth)
 
 func initAuths() {
-	a, err := ioutil.ReadFile(*authFile)
+	a, err := ioutil.ReadFile(authFile)
 	if err != nil {
-		log.Fatalf("Can not find auth file[%s].", *authFile)
+		log.Fatalf("Can not find auth file[%s].", authFile)
 	}
 	err = yaml.Unmarshal(a, &auths)
 	if err != nil {
-		log.Fatalf("YAML[%s] Unmarshal error: %v", *authFile, err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", authFile, err)
 	}
 }
 func GetAuths() (Auths, map[string]Auth) {

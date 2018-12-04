@@ -24,8 +24,8 @@ const (
 )
 
 var cfg = options.GetCfg()
-var auths, authsMap = options.GetAuths()
-var hostgroups, hostgroupsMap = options.GetHostgroups()
+var _, _ = options.GetAuths()
+var hostgroups, _ = options.GetHostgroups()
 var tasks, isScriptMode = options.GetTasks()
 
 func main() {
