@@ -45,6 +45,8 @@ authmethods:                                                         #The authme
 
 ```
 
+> privatekey/password至少选1项即可
+
 ## 主机信息配置
 
 > .rshell/hosts.yaml
@@ -63,6 +65,8 @@ hostgroups:                                 #The hostgroup list
   - from: 192.168.31.90
     to: 192.168.31.92
 ```
+
+> groups/hosts/hostranges至少选1项即可
 
 ## 脚本配置
 

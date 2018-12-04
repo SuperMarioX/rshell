@@ -70,28 +70,33 @@ func Download(groupname, host string, port int, user, pass, keyname, passphrase 
 			return err
 		}
 	}
-	if err = os.Mkdir(path.Join(desDirPath, host), os.ModeDir); err != nil {
+	if err = os.Mkdir(path.Join(desDirPath, groupname), os.ModeDir); err != nil {
+		if os.IsNotExist(err) {
+			return err
+		}
+	}
+	if err = os.Mkdir(path.Join(path.Join(desDirPath, groupname), host), os.ModeDir); err != nil {
 		if os.IsNotExist(err) {
 			return err
 		}
 	}
 
-	desFile, err := os.Create(path.Join(path.Join(desDirPath, host), desFileName))
-	if err != nil {
-		return err
-	}
-	defer desFile.Close()
-
 	srcFile, err := session.Open(srcFilePath)
 	if err != nil {
 		return err
-	}
-	defer desFile.Close()
+	} else {
+		desFile, err := os.Create(path.Join(path.Join(path.Join(desDirPath, groupname), host), desFileName))
+		if err != nil {
+			return err
+		}
+		defer desFile.Close()
 
-	_, err = io.Copy(desFile, srcFile)
-	if err != nil {
-		return err
+		_, err = io.Copy(desFile, srcFile)
+		if err != nil {
+			return err
+		}
 	}
+	defer srcFile.Close()
 
 	return nil
 }
