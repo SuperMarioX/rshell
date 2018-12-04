@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var dialcache = make(map[string]*ssh.Client)
+var dialcache = newSafeMap()
 
 func New(groupname, host string, port int, user, pass, keyname, passphrase string, timeout int, ciphers []string) (*ssh.Client, error) {
 	if groupname == "" {
@@ -29,7 +29,7 @@ func New(groupname, host string, port int, user, pass, keyname, passphrase strin
 	}
 
 	cachekey := groupname + "/" + host + ":" + fmt.Sprintf("%d", port)
-	if v, ok := dialcache[cachekey]; ok {
+	if v := dialcache.get(cachekey); v != nil {
 		return v, nil
 	}
 
@@ -75,6 +75,6 @@ func New(groupname, host string, port int, user, pass, keyname, passphrase strin
 		return nil, err
 	}
 
-	dialcache[cachekey] = client
+	dialcache.set(cachekey, client)
 	return client, nil
 }
