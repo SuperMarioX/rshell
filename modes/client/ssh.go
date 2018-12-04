@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var dialcache = cache.New(time.Hour, 2 * time.Hour)
+var dialcache = cache.New(100 * time.Second, 120 * time.Second)
 
 func New(groupname, host string, port int, user, pass, keyname, passphrase string, timeout int, ciphers []string) (*ssh.Client, error) {
 	if groupname == "" {
