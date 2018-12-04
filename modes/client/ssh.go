@@ -3,13 +3,14 @@ package client
 import (
 	"fmt"
 	"github.com/luckywinds/rshell/pkg/checkers"
+	"github.com/patrickmn/go-cache"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"net"
 	"time"
 )
 
-var dialcache = make(map[string]*ssh.Client)
+var dialcache = cache.New(time.Hour, 2 * time.Hour)
 
 func New(groupname, host string, port int, user, pass, keyname, passphrase string, timeout int, ciphers []string) (*ssh.Client, error) {
 	if groupname == "" {
@@ -29,8 +30,8 @@ func New(groupname, host string, port int, user, pass, keyname, passphrase strin
 	}
 
 	cachekey := groupname + "/" + host + ":" + fmt.Sprintf("%d", port)
-	if v, ok := dialcache[cachekey]; ok {
-		return v, nil
+	if v, ok := dialcache.Get(cachekey); ok {
+		return v.(*ssh.Client), nil
 	}
 
 	var err error
@@ -75,6 +76,6 @@ func New(groupname, host string, port int, user, pass, keyname, passphrase strin
 		return nil, err
 	}
 
-	dialcache[cachekey] = client
+	dialcache.Set(cachekey, client, cache.DefaultExpiration)
 	return client, nil
 }
