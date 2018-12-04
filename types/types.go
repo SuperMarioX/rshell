@@ -20,6 +20,7 @@ type Cfg struct {
 	HistoryFile   string     `yaml:"historyfile,omitempty"`
 	Mostusedcmds  []string   `yaml:"mostusedcmds,omitempty"`
 	Updateserver  []string     `yaml:"updateserver,omitempty"`
+	Outputtype    string      `yaml:"outputtype,omitempty"`
 }
 
 //Hosts config
@@ -79,6 +80,9 @@ type Tasks struct {
 
 //Result
 type Hostresult struct {
+	Actionname string `yaml:"actionname,omitempty"`
+	Actiontype string `yaml:"actiontype,omitempty"`
+	Groupname string `yaml:"groupname,omitempty"`
 	Hostaddr string `yaml:"hostaddr,omitempty"`
 	Error    string `yaml:"error,omitempyt"`
 	Stdout   string `yaml:"stdout,omitempty"`

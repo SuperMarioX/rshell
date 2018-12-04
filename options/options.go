@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	cfgFile   = flag.String("cfg", path.Join(".rshell", "cfg.yaml"), "System Config file to read, Default: "+path.Join(".rshell", "cfg.yaml"))
-	hostsFile = flag.String("hosts", path.Join(".rshell", "hosts.yaml"), "Hosts Config file to read, Default: "+path.Join(".rshell", "hosts.yaml"))
-	authFile  = flag.String("auth", path.Join(".rshell", "auth.yaml"), "Auth Config file to read, Default: "+path.Join(".rshell", "hosts.yaml"))
+	cfgFile   = path.Join(".rshell", "cfg.yaml")
+	hostsFile = path.Join(".rshell", "hosts.yaml")
+	authFile  = path.Join(".rshell", "auth.yaml")
 	script    = flag.String("f", "", "The script yaml.")
 	scriptValues   = flag.String("v", "", "The script values yaml.")
 )
@@ -25,6 +25,10 @@ var (
 func init() {
 	os.Mkdir(".rshell", os.ModeDir)
 	initFlag()
+
+	initCfg()
+	initHostgroups()
+	initAuths()
 }
 
 func initFlag() {
@@ -41,17 +45,16 @@ Options:`)
 var cfg Cfg
 
 func initCfg() {
-	c, err := ioutil.ReadFile(*cfgFile)
+	c, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
-		log.Fatalf("Can not find cfg file[%s].", *cfgFile)
+		log.Fatalf("Can not find cfg file[%s].", cfgFile)
 	}
 	err = yaml.Unmarshal(c, &cfg)
 	if err != nil {
-		log.Fatalf("YAML[%s] Unmarshal error: %v", *cfgFile, err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", cfgFile, err)
 	}
 }
 func GetCfg() Cfg {
-	initCfg()
 	if cfg.Concurrency == 0 {
 		cfg.Concurrency = 6
 	} else if cfg.Concurrency < 0 || cfg.Concurrency > 100 {
@@ -71,6 +74,11 @@ func GetCfg() Cfg {
 		cfg.PromptString = "rshell: "
 	} else if len(cfg.PromptString) > 20 {
 		log.Fatalf("Config PromptString illegal [%s] length > 20.", cfg.PromptString)
+	}
+	if cfg.Outputtype == "" {
+		cfg.Outputtype = "text"
+	} else if cfg.Outputtype != "text" {
+		log.Fatalf("Config Outputtype illegal [%s] not in [text].", cfg.Outputtype)
 	}
 	if cfg.Hostgroupsize == 0 {
 		cfg.Hostgroupsize = 200
@@ -93,15 +101,16 @@ func GetCfg() Cfg {
 }
 
 var hostgroups Hostgroups
+var hostgroupsm = make(map[string]Hostgroup)
 
 func initHostgroups() {
-	h, err := ioutil.ReadFile(*hostsFile)
+	h, err := ioutil.ReadFile(hostsFile)
 	if err != nil {
-		log.Fatalf("Can not find hosts file[%s].", *hostsFile)
+		log.Fatalf("Can not find hosts file[%s].", hostsFile)
 	}
 	err = yaml.Unmarshal(h, &hostgroups)
 	if err != nil {
-		log.Fatalf("YAML[%s] Unmarshal error: %v", *hostsFile, err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", hostsFile, err)
 	}
 }
 
@@ -189,6 +198,13 @@ func parseHostgroups(hgs Hostgroups) Hostgroups {
 			log.Fatalf("Too large. IP Range illegal [%s] > [%d].", hg.Groupname, cfg.Hostgroupsize)
 		}
 
+		if hg.Sshport < 0 {
+			log.Fatalf("SSH port illegal [%d] < 0.", hg.Sshport)
+		}
+
+		if hg.Sshport == 0 {
+			hg.Sshport = 22
+		}
 		rethg.Hgs = append(rethg.Hgs, hg)
 	}
 
@@ -196,44 +212,55 @@ func parseHostgroups(hgs Hostgroups) Hostgroups {
 }
 
 func GetHostgroups() (Hostgroups, map[string]Hostgroup) {
-	initHostgroups()
 	if len(hostgroups.Hgs) == 0 {
 		log.Fatal("The hostgroups empty.")
 	}
 	hostgroups = parseHostgroups(hostgroups)
-	var ret = make(map[string]Hostgroup)
 	for _, value := range hostgroups.Hgs {
-		ret[value.Groupname] = value
+		hostgroupsm[value.Groupname] = value
 	}
 
-	return hostgroups, ret
+	return hostgroups, hostgroupsm
+}
+func GetHostgroupByname(name string) (Hostgroup, error) {
+	if v, ok := hostgroupsm[name]; !ok {
+		return v, fmt.Errorf("hostgroup not exist")
+	} else {
+		return v, nil
+	}
 }
 
 var auths Auths
+var authsm = make(map[string]Auth)
 
 func initAuths() {
-	a, err := ioutil.ReadFile(*authFile)
+	a, err := ioutil.ReadFile(authFile)
 	if err != nil {
-		log.Fatalf("Can not find auth file[%s].", *authFile)
+		log.Fatalf("Can not find auth file[%s].", authFile)
 	}
 	err = yaml.Unmarshal(a, &auths)
 	if err != nil {
-		log.Fatalf("YAML[%s] Unmarshal error: %v", *authFile, err)
+		log.Fatalf("YAML[%s] Unmarshal error: %v", authFile, err)
 	}
 }
 func GetAuths() (Auths, map[string]Auth) {
-	initAuths()
 	if len(auths.As) == 0 {
 		log.Fatal("The auths empty.")
 	}
-	var ret = make(map[string]Auth)
 	for _, value := range auths.As {
-		ret[value.Name] = value
+		authsm[value.Name] = value
 	}
-	if len(auths.As) != len(ret) {
+	if len(auths.As) != len(authsm) {
 		log.Fatal("There is duplicate auth.")
 	}
-	return auths, ret
+	return auths, authsm
+}
+func GetAuthByname(name string) (Auth, error) {
+	if v, ok := authsm[name]; !ok {
+		return v, fmt.Errorf("auth not exist")
+	} else {
+		return v, nil
+	}
 }
 
 var tasks Tasks
