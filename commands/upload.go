@@ -49,14 +49,14 @@ func Upload(actionname, groupname string, srcFilePath, desDirPath string) error 
 			if !strings.HasSuffix(desDirPath, "/") {
 				desDirPath = desDirPath + "/"
 			}
-			err := sftp.Upload(groupname, host, port, user, pass, keyname, passphrase, timeout, ciphers, srcFilePath, desDirPath)
+			sfs, err := sftp.Upload(groupname, host, port, user, pass, keyname, passphrase, timeout, ciphers, srcFilePath, desDirPath)
 			var result types.Hostresult
 			result.Actionname = actionname
 			result.Actiontype = "upload"
 			result.Groupname = groupname
 			result.Hostaddr = host
 			if err == nil {
-				result.Stdout = "UPLOAD Success [" + srcFilePath + " -> " + desDirPath + "]"
+				result.Stdout = "UPLOAD Success [" + srcFilePath + " -> " + desDirPath + "] :\n" + strings.Join(sfs, "\n")
 			} else {
 				result.Stderr = "UPLOAD Failed [" + srcFilePath + " -> " + desDirPath + "] " + err.Error()
 			}
