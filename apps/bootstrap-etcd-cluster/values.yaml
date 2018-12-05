@@ -1,0 +1,8 @@
+local_root_path: apps/bootstrap-etcd-cluster
+target_root_path: /opt/etcd
+target_ssl_path: /opt/etcd/ssl
+target_data_path: /opt/etcd/data
+etcd_package_name: etcd-v3.3.6-linux-amd64.tar.gz
+etcd_package_dir: etcd-v3.3.6-linux-amd64
+etcd_sh_name: bootstrap-etcd-cluster.sh
+initial_cluster: infra0=https://10.0.27.239:2380,infra1=https://10.0.20.81:2380,infra2=https://10.0.29.112:2380

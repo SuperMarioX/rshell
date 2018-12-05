@@ -1,0 +1,63 @@
+tasks:
+- name: Bootstrap etcd prometheus
+  hostgroup: wlcb-cdb-etcd-prometheus
+  subtasks:
+  - name: init dir
+    mode: ssh
+    cmds:
+    - rm -rf {{.prometheus_root_path}} {{.prometheus_data_path}} {{.prometheus_ssl_path}} {{.grafana_root_path}}
+    - mkdir -p {{.prometheus_root_path}} {{.prometheus_data_path}} {{.prometheus_ssl_path}} {{.grafana_root_path}}
+    
+  - name: upload prometheus package
+    mode: sftp
+    ftptype: upload
+    srcfile: {{.local_root_path}}/{{.prometheus_package_name}}
+    desdir: {{.prometheus_root_path}}
+
+  - name: upload prometheus sh
+    mode: sftp
+    ftptype: upload
+    srcfile: {{.local_root_path}}/{{.prometheus_sh_name}}
+    desdir: {{.prometheus_root_path}}
+    
+  - name: upload prometheus cfg
+    mode: sftp
+    ftptype: upload
+    srcfile: {{.local_root_path}}/{{.prometheus_cfg_name}}
+    desdir: {{.prometheus_root_path}}
+    
+  - name: upload prometheus ssl
+    mode: sftp
+    ftptype: upload
+    srcfile: {{.local_root_path}}/ssl/*.pem
+    desdir: {{.prometheus_ssl_path}}
+    
+  - name: bootstrap prometheus
+    mode: ssh
+    cmds:
+    - cd {{.prometheus_ssl_path}}
+    - mv -f ca.pem prometheus.ca
+    - mv -f server.pem server.cert
+    - mv -f server-key.pem server.key
+    - mv -f client.pem client.cert
+    - mv -f client-key.pem client.key
+    - cd {{.prometheus_root_path}}
+    - tar zxf {{.prometheus_package_name}}
+    - cd {{.prometheus_package_dir}}
+    - mv -f ../{{.prometheus_sh_name}} .
+    - dos2unix {{.prometheus_sh_name}}
+    - sh {{.prometheus_sh_name}} {{.prometheus_data_path}} {{.prometheus_root_path}}/{{.prometheus_cfg_name}}
+    
+  - name: upload grafana package
+    mode: sftp
+    ftptype: upload
+    srcfile: {{.local_root_path}}/{{.grafana_package_name}}
+    desdir: {{.grafana_root_path}}
+    
+  - name: bootstrap grafana
+    mode: ssh
+    cmds:
+    - cd {{.grafana_root_path}}
+    - tar zxf {{.grafana_package_name}}
+    - cd {{.grafana_package_dir}}
+    - ./bin/grafana-server web > grafana.log 2>&1 &

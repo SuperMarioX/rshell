@@ -1,0 +1,11 @@
+local_root_path: apps/bootstrap-etcd-prometheus
+prometheus_root_path: /opt/prometheus
+prometheus_data_path: /opt/prometheus/data
+prometheus_ssl_path: /opt/prometheus/ssl
+prometheus_package_name: prometheus-2.4.3.linux-amd64.tar.gz
+prometheus_package_dir: prometheus-2.4.3.linux-amd64
+prometheus_sh_name: bootstrap-etcd-prometheus.sh
+prometheus_cfg_name: etcd.yaml
+grafana_package_name: grafana-5.2.0.linux-amd64.tar.gz
+grafana_package_dir: grafana-5.2.0
+grafana_root_path: /opt/grafana
