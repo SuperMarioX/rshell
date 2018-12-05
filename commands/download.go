@@ -50,14 +50,14 @@ func Download(actionname, groupname string, srcFilePath, desDirPath string) erro
 			if !strings.HasSuffix(desDirPath, "/") {
 				desDirPath = desDirPath + "/"
 			}
-			err := sftp.Download(groupname, host, port, user, pass, keyname, passphrase, timeout, ciphers, srcFilePath, desDirPath)
+			sfs, err := sftp.Download(groupname, host, port, user, pass, keyname, passphrase, timeout, ciphers, srcFilePath, desDirPath)
 			var result types.Hostresult
 			result.Actionname = actionname
 			result.Actiontype = "download"
 			result.Groupname = groupname
 			result.Hostaddr = host
 			if err == nil {
-				result.Stdout = "DOWNLOAD Success [" + srcFilePath + " -> " + path.Join(desDirPath, hg.Groupname) + "]"
+				result.Stdout = "DOWNLOAD Success [" + srcFilePath + " -> " + path.Join(desDirPath, hg.Groupname) + "] :\n" + strings.Join(sfs, "\n")
 			} else {
 				result.Stderr = "DOWNLOAD Failed [" + srcFilePath + " -> " + path.Join(desDirPath, hg.Groupname) + "] " + err.Error()
 			}
