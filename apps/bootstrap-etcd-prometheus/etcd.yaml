@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 10s
+scrape_configs:
+  - job_name: monitor-etcd
+    static_configs:
+    - targets: ['10.0.27.239:2379','10.0.29.112:2379','10.0.20.81:2379']
+    scheme: https
+    tls_config:
+      ca_file: /opt/prometheus/ssl/prometheus.ca
+      cert_file: /opt/prometheus/ssl/client.cert
+      key_file: /opt/prometheus/ssl/client.key
+      insecure_skip_verify: true
