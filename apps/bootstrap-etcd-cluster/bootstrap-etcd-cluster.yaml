@@ -1,0 +1,44 @@
+tasks:
+- name: Bootstrap etcd cluster
+  hostgroup: wlcb-cdb-etcd-server
+  subtasks:
+  - name: init dir
+    mode: ssh
+    cmds:
+    - rm -rf {{.target_root_path}} {{.target_data_path}} {{.target_ssl_path}}
+    - mkdir -p {{.target_root_path}} {{.target_data_path}} {{.target_ssl_path}}
+    
+  - name: upload etcd package
+    mode: sftp
+    ftptype: upload
+    srcfile: {{.local_root_path}}/{{.etcd_package_name}}
+    desdir: {{.target_root_path}}
+
+  - name: upload etcd sh
+    mode: sftp
+    ftptype: upload
+    srcfile: {{.local_root_path}}/{{.etcd_sh_name}}
+    desdir: {{.target_root_path}}
+    
+  - name: upload etcd ssl
+    mode: sftp
+    ftptype: upload
+    srcfile: {{.local_root_path}}/ssl/*.pem
+    desdir: {{.target_ssl_path}}
+
+  - name: bootstrap etcd
+    mode: ssh
+    cmds:
+    - cd {{.target_ssl_path}}
+    - mv -f ca.pem etcd.ca
+    - mv -f server.pem server.cert
+    - mv -f server-key.pem server.key
+    - mv -f client.pem client.cert
+    - mv -f client-key.pem client.key
+    - cd {{.target_root_path}}
+    - tar zxf {{.etcd_package_name}}
+    - cd {{.etcd_package_dir}}
+    - mv -f ../{{.etcd_sh_name}} .
+    - dos2unix {{.etcd_sh_name}}
+    - sh {{.etcd_sh_name}} {{.initial_cluster}} {{.target_root_path}} {{.target_data_path}} {{.target_ssl_path}}
+    

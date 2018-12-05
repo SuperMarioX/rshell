@@ -31,3 +31,7 @@ go build rshell.go
 
 - [配置说明](docs/config.md)
 - [使用说明](docs/usage.md)
+
+## 应用示例
+
+- [Auto Bootstrap A ETCD Cluster](apps/bootstrap-etcd-cluster/README.md)
